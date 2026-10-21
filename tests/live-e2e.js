@@ -33,14 +33,14 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     // A posts 2 photos through the form
     const p=A.p;await p.evaluate(()=>go("post"));await W(500);
     await p.setInputFiles("#pPhoto",[{name:"a.jpg",mimeType:"image/jpeg",buffer:await jpeg(p,20)},{name:"b.jpg",mimeType:"image/jpeg",buffer:await jpeg(p,200)}]);await W(2500);
-    await p.fill("#pName","テスト食堂"+R);await p.selectOption("#pPref","13");await p.fill("#pHours","11:00〜15:00");await p.click("#pSubmit");await W(6000);
+    await p.fill("#pName","テスト食堂"+R);await p.selectOption("#pPref","13");await p.fill("#pHours","11:00〜15:00");out.postAt=Date.now();await p.click("#pSubmit");await W(6000);
     const post=await p.evaluate(async()=>{const s=await S.sb.from("posts").select("id,data").eq("author",S.me);return s.data[0]});
     ok("posted",!!post&&post.data.pics===1&&/^sb:/.test(post.data.photo));
     // B sees it with photos
     await B.p.evaluate(()=>go("feed"));
     // how fast does the friend's new post arrive without reloading? (realtime; the 90s poll is the fallback)
     {const t0=Date.now();let seen=false;for(let i=0;i<55&&!seen;i++){seen=await B.p.evaluate(n=>visiblePosts().some(x=>x.name===n),"テスト食堂"+R);if(!seen)await W(2000)}
-     out.rtB=await B.p.evaluate(()=>window.HP_RT);out.rtA=await A.p.evaluate(()=>window.HP_RT);
+     out.rtB=await B.p.evaluate(t0=>({...window.HP_RT,log:window.HP_RT.log.map(([t,k])=>[Math.round((t-t0)/100)/10,k])}),out.postAt);out.bState=await B.p.evaluate(a=>({mutual:mutualIds().includes(a),sub:!!S.postSubs[a],n:(S.postsBy[a]||[]).length}),A.me);out.rtA=await A.p.evaluate(()=>window.HP_RT);
      out.bSeesNewPostSec=seen?Math.round((Date.now()-t0)/1000):null;ok("bSeesPostLive",seen)}
     if(!out.bSeesNewPostSec){await B.p.reload();await B.p.waitForFunction(()=>typeof S!=="undefined"&&S.me&&S.ready,null,{timeout:30000});await W(4000);await B.p.evaluate(()=>go("feed"));await W(1500)}
     const art=B.p.locator("article",{hasText:"テスト食堂"+R}).first();
