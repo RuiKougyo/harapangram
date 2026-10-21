@@ -3,6 +3,11 @@
 name: live-test
 on:
   workflow_dispatch:
+    inputs:
+      marker:
+        description: "このテキストが本番の index.html に出るまで待ってから始めます"
+        required: false
+        default: "osmBtn"
 permissions:
   contents: read
 jobs:
@@ -16,3 +21,5 @@ jobs:
           node-version: 20
       - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: node tests/live-e2e.js
+        env:
+          MARKER: ${{ inputs.marker }}
