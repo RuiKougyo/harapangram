@@ -721,7 +721,7 @@ function getPics(p){const n=Math.min(2,p.pics|0);if(!n||!S.db||p.sample)return P
 function photoAttrs(p){const ar=+p.ar;return ar>.3&&ar<4?{style:`aspect-ratio:${ar}`}:{class:"photo legacy"}}
 function gallery(p){const legacy=photosOf(p);const n=p.pics?1+Math.min(2,p.pics|0):legacy.length;if(n<2||!p.photo)return photoEl(p);
   const cnt=el("span",{class:"cnt",text:`1/${n}`});const a=photoAttrs(p);
-  const imgs=Array.from({length:n},(_,i)=>el("img",{class:a.class||"photo",style:a.style||"",src:p.pics?(i?"data:image/gif;base64,R0lGODlhAQABAAAAACw=":p.photo):legacy[i],alt:`${p.name}の写真 ${i+1}/${n}`,loading:"lazy"}));
+  const imgs=Array.from({length:n},(_,i)=>el("img",{class:a.class||"photo",style:a.style||"",src:p.pics?(i?BLANK:p.photo):legacy[i],alt:`${p.name}の写真 ${i+1}/${n}`,loading:"lazy"}));
   if(p.pics)getPics(p).then(list=>list.forEach((u,i)=>{if(u&&imgs[i+1])imgs[i+1].src=u}));
   const sc=el("div",{class:"sc"},...imgs);
   // tap the left or right edge to go back / forward, like Instagram stories
@@ -806,7 +806,24 @@ $("#fsort").addEventListener("change",e=>{const v=e.target.value;
   navigator.geolocation.getCurrentPosition(pos=>{const q=project(pos.coords.latitude,pos.coords.longitude);S.here={x:q.x,y:q.y};S.sort="near";renderFeed()},
     ()=>{toast("現在地が使えなかった。ブラウザの位置情報を許可してね");e.target.value=S.sort},{enableHighAccuracy:false,timeout:10000,maximumAge:600000})});
 $("#fprice").addEventListener("change",e=>{S.price=e.target.value;renderFeed()});
-function renderFeed(){S.postsVer=(S.postsVer||0)+1;
+// every data change (a like, a comment, someone else's post) rebuilds the feed; keep the reader where they were:
+// reuse already-loaded photos, keep each gallery's position, and scroll back so the same card stays put
+const BLANK="data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+function feedSnapshot(list){const hd=$("header.top");const top=hd?hd.getBoundingClientRect().bottom:0;
+  const cards=[...list.querySelectorAll(":scope > .post[id]")];const a=cards.find(c=>c.getBoundingClientRect().bottom>top+8);
+  const old=new Map(cards.map(c=>[c.id,{imgs:[...c.querySelectorAll("img.photo,img.legacy")],sl:(c.querySelector(".sc")||{}).scrollLeft||0}]));
+  return {old,anchor:a&&a.id,at:a&&a.getBoundingClientRect().top,h:list.offsetHeight}}
+function feedRestore(list,snap){
+  for(const c of list.querySelectorAll(":scope > .post[id]")){const o=snap.old.get(c.id);if(!o)continue;
+    const imgs=[...c.querySelectorAll("img.photo,img.legacy")];
+    imgs.forEach((im,i)=>{const was=o.imgs[i];if(was&&was.complete&&was.naturalWidth>1&&(was.src===im.src||im.src===BLANK))im.replaceWith(was)});
+    const sc=c.querySelector(".sc");if(sc&&o.sl){sc.scrollLeft=o.sl;sc.dispatchEvent(new Event("scroll"))}}
+  if(snap.anchor){const a=document.getElementById(snap.anchor);if(a){const d=a.getBoundingClientRect().top-snap.at;if(Math.abs(d)>1)window.scrollBy(0,d)}}
+  list.style.minHeight=""}
+function renderFeed(){const list=$("#feedList");const snap=S.view==="feed"&&list.children.length?feedSnapshot(list):null;
+  if(snap)list.style.minHeight=snap.h+"px";
+  renderFeedInner();if(snap)feedRestore(list,snap);else list.style.minHeight=""}
+function renderFeedInner(){S.postsVer=(S.postsVer||0)+1;
   const n=$("#feedNotice");n.textContent="";const list=$("#feedList");list.textContent="";
   if(!S.ready&&!S.offline){list.append(el("p",{class:"empty",text:"読み込み中…"}));return}
   if(S.sample){n.append(el("div",{class:"banner"},el("p",{},el("span",{class:"sample-flag",text:"サンプル表示中"})," 例のお店と例の友だちだよ。実際のデータではありません。"),el("div",{},el("button",{class:"btn small ghost",onclick:()=>{S.sample=false;renderAll()},text:"サンプルを閉じる"}))))}
