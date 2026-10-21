@@ -37,7 +37,12 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     const post=await p.evaluate(async()=>{const s=await S.sb.from("posts").select("id,data").eq("author",S.me);return s.data[0]});
     ok("posted",!!post&&post.data.pics===1&&/^sb:/.test(post.data.photo));
     // B sees it with photos
-    await B.p.evaluate(()=>go("feed"));await W(6000);const art=B.p.locator("article",{hasText:"テスト食堂"+R}).first();
+    await B.p.evaluate(()=>go("feed"));
+    // how fast does the friend's new post arrive without reloading? (realtime; the 90s poll is the fallback)
+    {const t0=Date.now();let seen=false;for(let i=0;i<55&&!seen;i++){seen=await B.p.evaluate(n=>visiblePosts().some(x=>x.name===n),"テスト食堂"+R);if(!seen)await W(2000)}
+     out.bSeesNewPostSec=seen?Math.round((Date.now()-t0)/1000):null;ok("bSeesPostLive",seen)}
+    if(!out.bSeesNewPostSec){await B.p.reload();await B.p.waitForFunction(()=>typeof S!=="undefined"&&S.me&&S.ready,null,{timeout:30000});await W(4000);await B.p.evaluate(()=>go("feed"));await W(1500)}
+    const art=B.p.locator("article",{hasText:"テスト食堂"+R}).first();
     ok("bSeesPost",(await art.count())===1);
     if(await art.count()){await art.scrollIntoViewIfNeeded();await W(3000);const im=await art.locator("img").evaluateAll(a=>a.map(i=>i.naturalWidth));ok("bSeesPhotos",im.filter(w=>w>0).length>=2);out.bImgs=im}
     // C (one-way) sees nothing, even asking the database and storage directly
@@ -46,7 +51,7 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     ok("cNoWrite",await C.p.evaluate(async a=>!!(await S.sb.from("posts").upsert({author:a,id:"hack",data:{name:"x"}},{onConflict:"author,id"})).error,A.me));
     // B likes + comments, A is notified
     await B.p.evaluate(async n=>{const q=visiblePosts().find(x=>x.name===n);await S.db.doc(`reacts/${S.me}/items/l_${pkey(q)}`).set({kind:"like",to:q.author,pid:q.id,at:Date.now()});await S.db.doc(`reacts/${S.me}/items/c_1`).set({kind:"c",to:q.author,pid:q.id,text:"おいしそう",at:Date.now()})},"テスト食堂"+R);
-    await W(6000);ok("aNotified",await A.p.evaluate(()=>notifs().length>=2));
+    {const t0=Date.now();let n=0;for(let i=0;i<55&&n<2;i++){n=await A.p.evaluate(()=>notifs().length);if(n<2)await W(2000)}out.aNotifiedSec=Math.round((Date.now()-t0)/1000);ok("aNotified",n>=2)}
     ok("cNoReacts",await C.p.evaluate(async()=>(await S.sb.from("reacts").select("id")).data.length===0));
   }catch(e){fails.push("exception: "+e.message)}
   // clean up: every test account deletes itself through the UI (photos first, then the account)
