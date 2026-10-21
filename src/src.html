@@ -1,0 +1,1146 @@
+<title>腹ぱんぐらむ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* Layout: phone-first app shell; glass header, one content column, floating glass tab bar.
+   Look: "週末のピック" cream + ink cards (H) and "くるくるメニュー＋水ガラス" genre revolver + liquid glass (I). */
+:root{
+  --bg:#fcf6ea; --bg2:#f5ead3; --surface:#fffcf5; --ink:#43382c; --muted:#7a6c5a; --line:#ebe0c8;
+  --noren:#5a4a3a; --yolk:#f5c862; --yolk-ink:#43382c; --stamp:#b14a2e; --ok:#3f7656;
+  --glass:rgba(255,252,245,.62); --glass-line:rgba(255,255,255,.9); --glass-hi:#fff;
+  --map-0:#ece3cd; --pf-1:#b5d3a9; --pf-2:#8fba84; --pf-3:#67a064; --pf-4:#477d4c; --map-v:#f6e7c4; --map-1:#f5c862; --map-2:#eba64a; --map-3:#d47a3a; --map-4:#a8483f;
+  --shadow:0 1px 2px rgba(67,56,44,.05),0 8px 22px rgba(67,56,44,.07);
+  --f-display:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg) linear-gradient(180deg,var(--bg2),var(--bg) 460px) no-repeat;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg2)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--glass-line);color:var(--ink)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.logo{font-family:var(--f-display);font-weight:900;font-size:20px;letter-spacing:.02em;line-height:1;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.logo .bowl{width:30px;height:30px;flex:none}
+.top .me{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;opacity:.95;min-width:0}
+.top .me span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+main{padding-block:18px 120px}
+section[data-view]{display:flex;flex-direction:column;gap:14px}
+h2{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.01em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin:0}
+
+.tabs{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;max-width:616px;margin:0 auto;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 24px rgba(67,56,44,.12)}
+.tabs .row{display:grid;grid-template-columns:repeat(5,1fr)}
+.tabs button{background:none;border:0;padding:7px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--muted)}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--ink);font-weight:700}
+.tabs .post-btn span.ic{width:44px;height:44px;border-radius:50%;background:var(--yolk);color:var(--yolk-ink);display:grid;place-items:center;margin-top:-20px;box-shadow:0 6px 14px rgba(214,150,40,.28)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
+.pad{padding:14px}
+.banner{background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.banner p{margin:0}
+.sample-flag{display:inline-block;background:var(--yolk);color:var(--yolk-ink);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;letter-spacing:.04em}
+
+.btn{border:0;border-radius:99px;padding:10px 16px;font-weight:700;background:var(--noren);color:var(--surface)}
+.btn.yolk,:root .btn.btn.yolk{background:var(--yolk);color:var(--yolk-ink)}
+.btn.ghost,:root .btn.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 14px;font-size:13px}
+.btn.danger,:root .btn.btn.danger{background:var(--stamp);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.row-gap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* post card */
+.post .head{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;flex:none;object-fit:cover;overflow:hidden}
+.av.big{width:72px;height:72px;font-size:30px}
+img.av{border:1px solid var(--line);background:var(--surface)}
+.icon-pick{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.post .who{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.post .who b{font-size:14px}
+.post .who small{color:var(--muted);font-size:12px}
+.gal{position:relative}.gal .sc{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.gal .sc::-webkit-scrollbar{display:none}.gal .sc .photo{flex:none;scroll-snap-align:center}
+.gal .gnav{position:absolute;top:0;bottom:0;width:28%;border:0;background:none;padding:0 10px;display:flex;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}.gal .gnav[hidden]{display:none}
+.gal .prev{left:0;justify-content:flex-start}.gal .next{right:0;justify-content:flex-end}
+.gal .gnav span{width:32px;height:32px;border-radius:50%;background:rgba(67,56,44,.55);color:#fffcf5;font-size:22px;line-height:30px;text-align:center;opacity:.85;transition:opacity .15s}
+@media (hover:hover){.gal .gnav span{opacity:0}.gal:hover .gnav span,.gal .gnav:focus-visible span{opacity:.9}}
+.gal .cnt{position:absolute;right:10px;top:10px;background:rgba(67,56,44,.78);color:#fffcf5;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pgrid:empty{display:none}.pgrid div{position:relative}.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
+.pgrid button{position:absolute;top:-6px;right:-6px;width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);background:var(--ink);color:var(--surface);font-size:15px;line-height:1;padding:0}
+.pgrid button::before{content:"";position:absolute;inset:-8px}
+.photo{aspect-ratio:4/3;width:100%;max-width:100%;object-fit:cover;display:block;background:var(--map-0)}
+.photo.legacy{object-fit:contain;background:var(--bg2)}
+.arrow{display:flex;gap:6px;flex-wrap:wrap}.arrow button{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 13px var(--f-body)}.arrow button[aria-pressed=true]{background:var(--noren);color:var(--surface);border-color:var(--noren)}
+.cropper{display:flex;flex-direction:column;gap:8px}.cropper[hidden]{display:none}
+.cframe{position:relative;overflow:hidden;width:100%;max-width:420px;margin:0 auto;border-radius:12px;background:var(--bg2);touch-action:none;cursor:grab}
+.cframe img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.cframe::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent calc(33.33% - .5px),rgba(255,252,245,.55) 0 calc(33.33% + .5px),transparent 0 calc(66.66% - .5px),rgba(255,252,245,.55) 0 calc(66.66% + .5px),transparent 0),linear-gradient(transparent calc(33.33% - .5px),rgba(255,252,245,.55) 0 calc(33.33% + .5px),transparent 0 calc(66.66% - .5px),rgba(255,252,245,.55) 0 calc(66.66% + .5px),transparent 0)}
+.zoomrow{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;min-height:44px}.zoomrow input{flex:1;accent-color:var(--noren)}
+.pgrid .on img{outline:3px solid var(--yolk);outline-offset:2px}.pgrid img{cursor:pointer}
+.ph{aspect-ratio:16/7;width:100%;max-width:100%;display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:64px;color:rgba(255,255,255,.92)}
+.post .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.shop{font-family:var(--f-display);font-weight:900;font-size:19px;line-height:1.3;margin:0;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.chip{border:1px solid var(--line);border-radius:99px;padding:1px 9px;font-size:12px;color:var(--ink);background:var(--bg)}
+.chip.pref{border-color:transparent;background:var(--noren);color:var(--surface)}
+.hara{display:inline-flex;gap:2px;align-items:center}
+.hara svg{width:18px;height:18px}
+.hara .lbl{font-size:12px;color:var(--muted);margin-right:4px}
+.comment{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.linkish{background:none;border:0;padding:0;display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;color:var(--noren);font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+
+/* map */
+.mapbox{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.mapbox svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.muni{fill:var(--map-0);stroke:var(--surface);stroke-width:.3px;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .2s}
+.muni:hover{filter:brightness(.94)}
+.muni.dim{opacity:.35}
+.muni.vp{fill:var(--map-v)}
+.muni.sel{stroke:var(--noren);stroke-width:2px}
+.pref-border{fill:none;stroke:var(--surface);stroke-width:1.3px;vector-effect:non-scaling-stroke;pointer-events:none}
+.zoomed .muni{stroke-width:.6px}
+.crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.gm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+.gm-row a,.post a.gm{color:var(--noren);font-weight:700;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px}
+.sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.sugg button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 10px;font-weight:400}
+.sugg button:first-child{border-top:0}
+.sugg button:hover,.sugg button:focus-visible{background:var(--bg)}
+.sugg b{font-weight:700;display:block}
+.sugg small{color:var(--muted);font-size:12px}
+.sugg .cap{font-size:11px;color:var(--muted);padding:6px 10px 0;font-weight:700}
+.addr{color:var(--muted);font-size:12px;margin:0}
+.hint{font-size:12px;color:var(--muted);margin:0;font-weight:400}
+.hint.ok{color:var(--ok)}
+.pin{stroke:var(--surface);pointer-events:none;vector-effect:non-scaling-stroke}
+.halo path{fill:var(--noren);stroke:var(--noren);stroke-width:3.2px;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.zoomed .halo path{stroke-width:4px}
+.want{fill:var(--surface);stroke:var(--stamp);vector-effect:non-scaling-stroke;pointer-events:none}
+.porder{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.porder[hidden]{display:none}
+.shopline{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:14px;background:var(--bg2);border:0;color:var(--ink);font:700 13px var(--f-body);text-align:left;width:100%}
+.shopline b{font-family:var(--f-display);font-size:16px;color:var(--stamp)}
+.rank{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line)}.rank:first-of-type{border-top:0}
+.rank .no{width:26px;text-align:center;font:900 18px var(--f-display);color:var(--muted)}.rank.top .no{color:var(--stamp)}
+.rank .txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}.rank .txt small{color:var(--muted);font-size:12px}
+.rank .n{font:900 20px var(--f-display);font-variant-numeric:tabular-nums}.rank .n small{font:700 11px var(--f-body);color:var(--muted);margin-left:2px}
+.rank.me{background:var(--bg2)}
+.inset{fill:none;stroke:var(--line);stroke-dasharray:3 3}
+.inset-lbl{fill:var(--muted);font-size:10px;font-family:var(--f-body)}
+.map-tools{position:absolute;right:10px;top:10px;display:flex;gap:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:18px;padding:10px 12px;display:flex;flex-direction:column}
+.stat b{font-family:var(--f-display);font-weight:900;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat small{color:var(--muted);font-size:11px}
+.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.legend i{width:16px;height:10px;border-radius:2px;display:inline-block}
+
+/* lists */
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .txt{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.35}
+.item .txt .handle{color:var(--muted);font-size:12px}
+.item .txt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .txt small{color:var(--muted);font-size:12px}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.badge.mutual{background:var(--ok);color:var(--surface)}
+.badge.inv{background:var(--yolk);color:var(--yolk-ink)}
+.badge.one{background:var(--map-0);color:var(--muted)}
+.thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none}
+.thumb.ph{font-size:26px;aspect-ratio:auto}
+
+/* form */
+form{display:flex;flex-direction:column;gap:14px}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+label.f small{font-weight:400;color:var(--muted)}
+input[type=text],select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface);font-weight:400}
+textarea{min-height:90px;resize:vertical}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices label{position:relative}
+.choices input{position:absolute;opacity:0;inset:0}
+.choices span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-weight:500;font-size:13px;background:var(--surface)}
+.choices input:checked+span{background:var(--noren);border-color:var(--noren);color:var(--surface)}
+.choices input:focus-visible+span{outline:3px solid var(--yolk);outline-offset:2px}
+.rate{display:flex;gap:4px}
+.rate button{background:none;border:0;padding:2px}
+.rate svg{width:34px;height:34px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);cursor:pointer;display:block}
+.drop img{max-height:220px;margin:0 auto;border-radius:8px}
+.mini svg{display:block;width:100%;height:auto;max-height:280px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:crosshair}
+.err{color:var(--stamp);font-size:13px;margin:0}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--noren);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.auth{position:fixed;inset:0;z-index:60;background:var(--bg) linear-gradient(180deg,var(--bg2),var(--bg) 460px) no-repeat;display:grid;place-items:center;padding:16px;overflow:auto}
+.authcard{width:min(400px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(67,56,44,.12)}
+.authform{display:flex;flex-direction:column;gap:10px}.authform input{min-height:48px;border:1px solid var(--line);border-radius:14px;padding:0 14px;font:inherit;background:var(--bg);color:var(--ink)}
+.authform .btn{min-height:48px}.autherr{color:#a3402e;font-size:14px;margin:0}.autherr.ok{color:#2f6b3a}
+.authlinks{display:flex;flex-direction:column;align-items:center;gap:2px}.authlinks .linkish{min-height:44px}
+body.authing{overflow:hidden}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(67,56,44,.42);display:grid;place-items:center;padding:16px}
+.modal .card{width:100%;max-width:420px}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.empty{color:var(--muted);text-align:center;padding:24px 12px;margin:0}
+/* H: weekend pick rail (scroll-snap) */
+.pickrail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-16px;padding:6px 16px 10px;scroll-padding-inline:16px}
+.pickrail::-webkit-scrollbar{display:none}
+.pc{flex:none;width:min(46vw,180px);aspect-ratio:1/1;border-radius:22px;padding:16px;color:#fffcf5;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;scroll-snap-align:center;border:0;text-align:left;background:#5b6b8c;transition:transform .3s,box-shadow .3s}
+.pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc.has-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.65))}
+.pc .k{position:absolute;top:10%;left:0;right:0;text-align:center;font:900 56px/1 var(--f-display);opacity:.9}
+.pc b,.pc small{position:relative;z-index:1}
+.pc b{font-family:var(--f-display);font-weight:900;font-size:17px;line-height:1.3}
+.pc small{font-size:12px;opacity:.9}
+.pc.on{outline:3px solid var(--noren);outline-offset:3px}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:9px;background:var(--line);transition:width .25s,background .25s}
+.dots i.on{width:22px;background:var(--noren)}
+.pickbar{padding:12px 12px 12px 18px;border-radius:18px;background:var(--noren);color:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700}
+.pickbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pickbar a,.pickbar button{flex:none;border:0;background:var(--yolk);color:var(--yolk-ink);border-radius:99px;padding:0 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:700;font-size:13px;text-decoration:none}
+/* I: genre revolver + liquid glass */
+.ring{position:relative;height:172px;perspective:900px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px;border-radius:22px}
+.ring button{position:absolute;left:50%;top:12px;width:100px;height:136px;margin-left:-50px;border:0;border-radius:20px;font:700 46px/1 var(--f-body);color:#fffcf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 24px rgba(67,56,44,.16);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.ring button small{font-size:13px;font-weight:700;opacity:.95}
+.ring .gi{width:64px;height:64px;overflow:visible}
+.gi .b{fill:#fffcf5}.gi .a{fill:var(--acc)}.gi .l{fill:none;stroke:#fffcf5;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.gi .l.thin{stroke-width:2}
+.gi .b~.l.thin,.gi .a~.l.thin{stroke:var(--g)}
+.ring button.all .gi .a{fill:#eba64a}.ring button.all .gi .l{stroke:var(--ink)}
+.ring button.cur{z-index:3}
+.ring button.all{color:var(--yolk-ink)}
+.glassrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:-6px}
+.glassrow>button{width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-line);background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-size:20px;line-height:1;color:var(--ink)}
+.glass{padding:14px 16px;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 24px rgba(67,56,44,.1);text-align:center;min-width:0}
+.glass b{font-family:var(--f-display);font-weight:900;font-size:19px;display:block}
+.glass small{display:block;color:var(--muted);font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* social bits */
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:0 14px;font-size:13px;font-weight:700;color:var(--ink)}
+.act svg{width:16px;height:16px}
+.item .confirm{flex-direction:column;align-items:flex-end}
+.act[aria-pressed="true"]{background:var(--yolk);border-color:var(--yolk);color:var(--yolk-ink)}
+.act.like[aria-pressed="true"]{background:#fbe3d6;border-color:#f1c3ad;color:#a8483f}
+.bell{position:relative;background:none;border:0;padding:10px;width:44px;height:44px;color:var(--ink);display:grid;place-items:center}
+.bell svg{width:24px;height:24px}
+.bell b{position:absolute;top:0;right:0;min-width:18px;height:18px;border-radius:9px;background:var(--stamp);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 5px}
+.notif{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;width:100%}
+.notif:first-child{border-top:0}
+.notif .txt{flex:1;min-width:0;line-height:1.4;font-size:14px}
+.notif small{display:block;color:var(--muted);font-size:12px}
+.notif.new .txt::after{content:"NEW";margin-left:6px;font-size:10px;font-weight:700;color:var(--stamp)}
+.sheet{max-height:min(80vh,640px);overflow:auto}
+.cmt{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.cmt:first-child{border-top:0}
+.cmt .txt{flex:1;min-width:0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.cmt .txt b{font-size:13px;margin-right:6px}
+.cmt small{color:var(--muted);font-size:11px}
+.cmt.reply{margin-left:34px;border-top:0;padding-top:2px}.cmt.reply .av{width:28px;height:28px;font-size:12px}.cmt .at{color:var(--noren);font-weight:700;font-size:13px}
+#replyChip{display:flex;align-items:center}#replyChip[hidden]{display:none}
+.filters{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+.filters select{width:auto;padding-inline:10px}
+@media (max-width:420px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;letter-spacing:.18em;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:6px 14px}
+.secttl{font-size:13px;font-weight:700;color:var(--muted);padding:10px 14px 0}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.chk input{width:18px;height:18px;accent-color:var(--ok)}
+.item.done .txt b{text-decoration:line-through;color:var(--muted)}
+/* friends' latest posts row + post viewer */
+.stories{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px 4px}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:none;width:68px;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;color:var(--ink)}
+.story .ringav{width:64px;height:64px;border-radius:50%;padding:3px;background:var(--line);display:grid;place-items:center}
+.story.fresh .ringav{background:conic-gradient(from 200deg,var(--yolk),#eba64a,#d47a3a,var(--yolk))}
+.story .ringav>*{width:58px;height:58px;border:3px solid var(--bg);font-size:22px}
+.story b{font-size:12px;font-weight:700;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.story small{font-size:10px;color:var(--muted);margin-top:-4px}
+.viewer{position:fixed;inset:0;z-index:45;background:rgba(67,56,44,.42);display:flex;align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px){.viewer{align-items:center}}
+.viewer .sheetv{width:100%;max-width:520px;max-height:calc(100dvh - 24px);overflow:auto;border-radius:24px;background:var(--bg);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.viewer .vbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--glass-line)}
+.viewer .vbar .prog{flex:1;display:flex;gap:4px}
+.viewer .vbar .prog i{flex:1;height:3px;border-radius:2px;background:var(--line)}
+.viewer .vbar .prog i.on{background:var(--ink)}
+.viewer .vbar button{width:44px;height:44px;border-radius:50%;border:0;background:none;font-size:20px;color:var(--ink)}
+.viewer .vbody{padding:10px}
+.viewer .vbody .card{box-shadow:none}
+/* one quick fade so screens never snap */
+@keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.viewer.show{animation:fadeIn .16s ease-out}
+.viewer.show .sheetv{animation:popIn .18s cubic-bezier(.2,.8,.2,1)}
+.viewer.leave{animation:fadeIn .12s ease-in reverse forwards}
+.vswap{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
+section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
+.modal:not([hidden]){animation:fadeIn .14s ease-out}
+.modal:not([hidden])>*{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.pickrail{scroll-behavior:auto}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="logo"><svg class="bowl" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 15h26a13 11 0 0 1-26 0z" fill="#f5c862"/><path d="M5 15c2-5 6-7 11-7s9 2 11 7" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.2"/><path d="M10 4l3 9M15 3l1 10" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/></svg>腹ぱんぐらむ</div>
+  <div class="me" id="meBox"></div>
+  <button class="bell" id="bellBtn" type="button" aria-label="お知らせ" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><b id="bellN" hidden></b></button>
+</div></header>
+
+<main class="wrap">
+  <section data-view="feed" id="v-feed">
+    <div><h2 style="font-size:24px">今週末どこ行く？</h2><p class="sub">相互フォローの友だちのおすすめから1軒えらぼう</p></div>
+    <div class="stories" id="stories" aria-label="友だちの新しい投稿" hidden></div>
+    <div id="feedNotice"></div>
+    <div id="pickBox" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="pickrail" id="pickRail" aria-label="おすすめのお店"></div>
+      <div class="dots" id="pickDots" aria-hidden="true" hidden></div>
+      <div class="pickbar"><span id="pickName"></span><a id="pickGo" target="_blank" rel="noopener">ここに決めた</a></div>
+    </div>
+    <div id="ringBox" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:18px">ジャンルでえらぶ</h2><button type="button" class="linkish" onclick="document.getElementById('tlTitle').scrollIntoView({behavior:'smooth'})">タイムラインへ ↓</button></div>
+      <div class="ring" id="ring" tabindex="0" role="listbox" aria-label="ジャンル（左右キーかスワイプで回る）"></div>
+      <div class="glassrow"><button type="button" id="ringPrev" aria-label="前のジャンル">‹</button><div class="glass" id="ringGlass" aria-live="polite"></div><button type="button" id="ringNext" aria-label="次のジャンル">›</button></div>
+    </div>
+    <h2 id="tlTitle" style="font-size:18px;scroll-margin-top:72px">タイムライン</h2>
+    <div class="filters" id="filters" hidden>
+      <input type="text" id="fq" placeholder="店名・地域・ひとことでさがす" aria-label="店名・地域・ひとことでさがす" autocomplete="off">
+      <select id="fsort" aria-label="並べ替え"><option value="new">新しい順</option><option value="rate">満足度が高い順</option><option value="cheap">安い順</option></select>
+      <select id="fprice" aria-label="値段でしぼる"><option value="">値段すべて</option><option>〜¥1,000</option><option>¥1,000〜3,000</option><option>¥3,000〜6,000</option><option>¥6,000〜</option></select>
+    </div>
+    <div id="feedList" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section data-view="map" id="v-map" hidden>
+    <div><h2>腹ぱんマップ</h2><p class="sub">相互フォローの友だちと自分が行った場所を市区町村ごとに色分け。タップで県にズーム、もう一度タップで市区町村をえらべるよ</p></div>
+    <div class="arrow" id="mapWho" role="group" aria-label="地図に出す人"><button type="button" data-who="all" aria-pressed="true">みんな</button><button type="button" data-who="me" aria-pressed="false">自分だけ</button></div>
+    <div class="stats" id="mapStats"></div>
+    <div class="mapbox">
+      <svg id="bigMap" viewBox="40 8 590 605" role="img" aria-label="日本地図（市区町村）"></svg>
+      <div class="map-tools"><button class="btn small ghost" id="zoomOut" hidden style="background:var(--surface)">全国にもどる</button></div>
+    </div>
+    <div class="legend"><i style="background:var(--surface);border:2px solid var(--stamp);border-radius:50%;width:12px;height:12px"></i>行きたいお店<i style="background:var(--noren);margin-left:10px"></i>行った県のふち</div>
+    <div class="legend"><span>都道府県ごとの投稿数</span><i style="background:var(--map-0)"></i>0<i style="background:var(--pf-1)"></i>1〜2<i style="background:var(--pf-2)"></i>3〜5<i style="background:var(--pf-3)"></i>6〜10<i style="background:var(--pf-4)"></i>11〜</div>
+    <div class="legend"><span>市区町村ごとの投稿数</span><i style="background:var(--map-0)"></i>0<i style="background:var(--map-1)"></i>1<i style="background:var(--map-2)"></i>2〜3<i style="background:var(--map-3)"></i>4〜6<i style="background:var(--map-4)"></i>7〜</div>
+    <div id="prefList"></div>
+    <h2 style="font-size:17px">制覇ランキング</h2>
+    <div class="card" id="rankList"></div>
+    <p class="hint">地図の形：<a href="https://www.npmjs.com/package/jpn-atlas" target="_blank" rel="noopener">jpn-atlas</a>（BSD-3-Clause）／市区町村名：<a href="https://www.npmjs.com/package/jp-local-gov" target="_blank" rel="noopener">jp-local-gov</a>（MIT）</p>
+  </section>
+
+  <section data-view="post" id="v-post" hidden>
+    <div><h2 id="postTitle">お店を投稿</h2><p class="sub">投稿は相互フォローの友だちにだけ見えるよ</p></div>
+    <form id="postForm" class="card pad" novalidate>
+      <div class="f" style="display:flex;flex-direction:column;gap:6px"><label class="f" for="pName">お店の名前</label><input type="text" id="pName" maxlength="60" placeholder="例：中華そば まるいち" autocomplete="off" required>
+        <div class="sugg" id="pSugg" hidden></div></div>
+      <label class="f">住所 <small>なくてもOK。打つと都道府県と市区町村を自動で入れるよ</small><input type="text" id="pAddr" maxlength="120" placeholder="例：大阪府大阪市北区梅田1-2-3" autocomplete="off"></label>
+      <p class="hint" id="addrHint" hidden></p>
+      <label class="f">GoogleマップのURL <small>なくてもOK。Googleマップの「共有」でコピーしたリンクを貼ってね</small><input type="text" id="pGmap" inputmode="url" maxlength="1000" placeholder="https://www.google.com/maps/place/..."></label>
+      <div class="gm-row"><a id="gmSearch" href="https://www.google.com/maps" target="_blank" rel="noopener">Googleマップで探す</a><a id="tbSearch" href="https://tabelog.com/" target="_blank" rel="noopener">食べログで探す</a><p class="hint" id="gmHint">店名を入れるとGoogleマップや食べログで検索できるよ</p></div>
+      <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">ジャンル<div class="choices" id="pGenre"></div></div>
+      <label class="f">都道府県<select id="pPref" required><option value="">えらんでね</option></select></label>
+      <label class="f" id="cityWrap" hidden>市区町村<select id="pCity"><option value="">えらんでね</option></select></label>
+      <div class="mini" id="miniWrap" hidden>
+        <p class="sub" style="margin-bottom:6px">地図をタップするとお店の場所にピンが立って、市区町村も自動で入るよ</p>
+        <svg id="miniMap" viewBox="0 0 10 10" role="img" aria-label="ピンを立てる地図"></svg>
+      </div>
+      <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">満足度<div class="rate" id="pRate"></div></div>
+      <label class="f">だいたいの値段<select id="pPrice"><option value="">ー</option><option>〜¥1,000</option><option>¥1,000〜3,000</option><option>¥3,000〜6,000</option><option>¥6,000〜</option></select></label>
+      <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:14px">写真 <small>3枚まで。比率をえらんで、写真をドラッグで動かしたりズームしたりできるよ</small>
+        <div class="arrow" id="arRow" role="group" aria-label="写真の比率" hidden></div>
+        <div class="cropper" id="cropper" hidden><div class="cframe" id="cframe" aria-label="写真の位置（ドラッグで動かす）"><img id="cimg" alt=""></div>
+          <label class="zoomrow">ズーム<input type="range" id="czoom" min="1" max="3" step="0.01" value="1"></label>
+          <div class="porder" id="porder" hidden></div></div>
+        <div class="pgrid" id="photoGrid"></div>
+        <label class="drop" id="dropZone" for="pPhoto"><span id="dropTxt">タップして写真をえらぶ</span></label>
+        <input type="file" id="pPhoto" accept="image/*" multiple hidden>
+      </div>
+      <label class="f">ひとこと<textarea id="pComment" maxlength="400" placeholder="何がおいしかった？"></textarea></label>
+      <p class="err" id="pErr" hidden></p>
+      <button class="btn yolk" type="submit" id="pSubmit">投稿する</button>
+      <button class="btn ghost" type="button" id="pCancel" hidden>編集をやめる</button>
+    </form>
+  </section>
+
+  <section data-view="friends" id="v-friends" hidden>
+    <div><h2>ともだち</h2><p class="sub">お互いフォローすると相互フォロー。投稿と地図が見えるようになるよ</p></div>
+    <div class="card pad" id="inviteBox" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="card list" id="reqList" hidden></div>
+    <input type="text" id="fSearch" placeholder="名前かIDでさがす" aria-label="名前かIDでさがす">
+    <div class="card list" id="friendList"></div>
+    <div class="card list" id="blockList" hidden></div>
+  </section>
+
+  <section data-view="mine" id="v-mine" hidden>
+    <div><h2>マイページ</h2></div>
+    <div class="card pad" id="myProfile"></div>
+    <div class="stats" id="myStats"></div>
+    <h2 style="font-size:17px">行きたいリスト</h2>
+    <div class="card list" id="saveList"></div>
+    <h2 style="font-size:17px">自分の投稿</h2>
+    <div class="card list" id="myPosts"></div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="メニュー"><div class="row">
+  <button data-tab="feed" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>タイムライン</button>
+  <button data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>マップ</button>
+  <button data-tab="post" class="post-btn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>投稿</button>
+  <button data-tab="friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/></svg>ともだち</button>
+  <button data-tab="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>マイページ</button>
+</div></nav>
+
+<div id="toast" class="toast" hidden role="status"></div>
+<div id="viewer" class="viewer" hidden role="dialog" aria-modal="true" aria-label="投稿"></div>
+<div id="modal" class="modal" hidden></div>
+<div id="auth" class="auth" hidden role="dialog" aria-modal="true" aria-label="ログイン"></div>
+
+<script>
+const MAP=/*__MAP__*/{munis:[],prefB:""};
+const PREF_NAMES=["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+const GENRES=[["ラーメン","麺","#b6532f"],["寿司","鮨","#3f7871"],["焼肉","肉","#a8483f"],["カフェ","珈","#896046"],["定食","膳","#4d7752"],["居酒屋","酒","#685a9a"],["スイーツ","甘","#a3577a"],["その他","食","#626c7d"]];
+const GMAP=Object.fromEntries(GENRES.map(g=>[g[0],g]));
+const COLORS=["#b6532f","#3f7871","#4d7752","#a3577a","#685a9a","#4f6f8a","#896046","#626c7d"];
+const SVGNS="http://www.w3.org/2000/svg";
+const $=s=>document.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?"":v)}for(const c of kids.flat())if(c!=null)e.append(c.nodeType?c:document.createTextNode(c));return e};
+const sv=(tag,attrs={})=>{const e=document.createElementNS(SVGNS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e};
+
+// ---------- state ----------
+const APP_URL=location.origin+location.pathname;
+const S={saves:{},reacts:{},reactSubs:{},notifSeen:0,gotState:false,autoBusy:false,q:"",sort:"new",price:"",cmtFor:null,genreIdx:0,picks:[],pickIdx:0,pickKey:null,db:null,user:null,me:null,ready:false,offline:false,sample:false,profiles:{},follows:{},postsBy:{},postSubs:{},writeBusy:false,view:"feed",mapPref:null,mapCity:null,form:{rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null}};
+function colorOf(id){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]}
+function nick(id){if(S.sample&&SAMPLE.profiles[id])return SAMPLE.profiles[id].nick;return (S.profiles[id]&&S.profiles[id].nick)||"だれか"}
+// follows/{uid} = {ids, since:{id:ts}, blocked:[], declined:[], invAccepted:[]}
+function myF(){return S.follows[S.me]||{}}
+function iFollow(id){return (myF().ids||[]).includes(id)}
+function followsMe(id){return (S.follows[id]?.ids||[]).includes(S.me)}
+function iBlocked(id){return (myF().blocked||[]).includes(id)}
+function blockedMe(id){return (S.follows[id]?.blocked||[]).includes(S.me)}
+function isBlocked(id){return iBlocked(id)||blockedMe(id)}
+function mutualIds(){if(!S.me)return[];return Object.keys(S.profiles).filter(id=>id!==S.me&&iFollow(id)&&followsMe(id)&&!isBlocked(id))}
+function requestIds(){if(!S.me)return[];return Object.keys(S.profiles).filter(id=>id!==S.me&&followsMe(id)&&!iFollow(id)&&!isBlocked(id)&&!(myF().declined||[]).includes(id))}
+function pkey(p){return p.author+"_"+p.id}
+function visiblePosts(){
+  if(S.sample)return SAMPLE.posts.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  const ids=new Set([...mutualIds(),S.me]);const out=[];
+  for(const id of ids)for(const p of (S.postsBy[id]||[]))out.push(p);
+  return out.sort((a,b)=>b.createdAt-a.createdAt);
+}
+function ago(t){const s=(Date.now()-t)/1000;if(s<60)return"たった今";if(s<3600)return Math.floor(s/60)+"分前";if(s<86400)return Math.floor(s/3600)+"時間前";if(s<86400*30)return Math.floor(s/86400)+"日前";const d=new Date(t);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
+let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+
+// ---------- sample data (local only, never written) ----------
+const SAMPLE=(()=>{const now=Date.now(),h=3600e3;
+  const profiles={s1:{nick:"たべるん"},s2:{nick:"こなもん部長"},s3:{nick:"はらぺこ"}};
+  const raw=[["s1","中華そば まるいち（例）","ラーメン","13113",5,"〜¥1,000","煮干しがガツンとくる。替え玉必須。",2],["s2","たこ焼き きんちゃん（例）","その他","27100",4,"〜¥1,000","外カリ中とろ。ソースが甘めで好き。",5],["s3","海鮮丼 しおさい（例）","寿司","01202",5,"¥1,000〜3,000","ウニが溶けた…朝から並ぶ価値あり。",20],["s1","喫茶 ぽぷら（例）","カフェ","26100",4,"〜¥1,000","固めのプリンとナポリタン。",30],["s2","焼肉 ほむら（例）","焼肉","40130",5,"¥3,000〜6,000","ハラミが厚い。白ごはんが止まらん。",48],["s3","沖縄そば みなと（例）","ラーメン","47201",4,"〜¥1,000","ソーキがほろほろ。コーレーグースかけて。",70],["s1","定食 こばやし（例）","定食","04100",4,"〜¥1,000","牛タン定食、麦めしおかわり無料。",96],["s2","甘味処 ゆず（例）","スイーツ","17201",5,"〜¥1,000","わらび餅ぷるぷる。",130]];
+  return{profiles,posts:raw.map((r,i)=>({id:"sp"+i,author:r[0],name:r[1],genre:r[2],pref:r[3].slice(0,2),city:r[3],rate:r[4],price:r[5],comment:r[6],createdAt:now-r[7]*h,x:null,y:null,sample:true}))};
+})();
+
+// ---------- map ----------
+// Municipality shapes are pre-projected (equirectangular, see make_map.js); Okinawa is shifted into the inset.
+const MUNI={},PREF_BOX={},PREF_C={};
+for(const[code,name,d]of MAP.munis){const rings=[];let X0=1e9,Y0=1e9,X1=-1e9,Y1=-1e9,big=null;
+  for(const seg of d.split("Z")){if(!seg)continue;const pts=seg.slice(1).split("L").map(q=>q.split(",").map(Number));let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const[x,y]of pts){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
+    rings.push(pts);X0=Math.min(X0,x0);Y0=Math.min(Y0,y0);X1=Math.max(X1,x1);Y1=Math.max(Y1,y1);const a=(x1-x0)*(y1-y0);if(!big||a>big.a)big={a,x:(x0+x1)/2,y:(y0+y1)/2}}
+  const pref=code.slice(0,2);MUNI[code]={code,name,pref,d,rings,b:{x:X0,y:Y0,w:X1-X0,h:Y1-Y0},c:big,a:big?big.a:0};
+  if(!(pref==="13"&&/^13[34]/.test(code))){const B=PREF_BOX[pref];PREF_BOX[pref]=B?{x0:Math.min(B.x0,X0),y0:Math.min(B.y0,Y0),x1:Math.max(B.x1,X1),y1:Math.max(B.y1,Y1)}:{x0:X0,y0:Y0,x1:X1,y1:Y1}}
+  if(!PREF_C[pref]||MUNI[code].a>PREF_C[pref].a)PREF_C[pref]={a:MUNI[code].a,x:big.x,y:big.y}}
+const MUNIS_BY_PREF={};for(const m of Object.values(MUNI))(MUNIS_BY_PREF[m.pref]=MUNIS_BY_PREF[m.pref]||[]).push(m);
+function cityName(code){return MUNI[code]?MUNI[code].name:""}
+function placeLabel(p){return (PREF_NAMES[+p.pref-1]||"")+(p.city&&MUNI[p.city]?" "+MUNI[p.city].name:"")}
+function project(lat,lon){const oki=(lat<27.2&&lon<128.3)||(lat<26.5&&lon<132);let x=(lon-122.5)*MAP.K*MAP.C,y=(46-lat)*MAP.K;if(oki){x+=MAP.OX;y+=MAP.OY}return{x,y}}
+function inRing(x,y,r){let ins=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const[xi,yi]=r[i],[xj,yj]=r[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)ins=!ins}return ins}
+function muniAt(x,y){for(const m of Object.values(MUNI)){const b=m.b;if(x<b.x||y<b.y||x>b.x+b.w||y>b.y+b.h)continue;if(m.rings.some(r=>inRing(x,y,r)))return m}return null}
+function buildMap(svg){
+  svg.textContent="";
+  svg.append(sv("rect",{x:44,y:34,width:236,height:112,rx:6,class:"inset"}));
+  const lbl=sv("text",{x:50,y:47,class:"inset-lbl"});lbl.textContent="沖縄県";svg.append(lbl);
+  svg.append(sv("g",{class:"halo"}));const g=sv("g",{class:"munis"});svg.append(g);
+  for(const m of Object.values(MUNI)){const p=sv("path",{d:m.d,"data-code":m.code,"data-pref":m.pref,class:"muni"});const t=sv("title");t.textContent=PREF_NAMES[+m.pref-1]+" "+m.name;p.append(t);g.append(p)}
+  svg.append(sv("path",{d:MAP.prefB,class:"pref-border"}));
+  svg.append(sv("g",{class:"wants"}),sv("g",{class:"pins"}));
+}
+function jitter(seed,k){let h=0;for(const c of seed)h=(h*33+c.charCodeAt(0))>>>0;return[((h%1000)/1000-.5)*k,(((h>>10)%1000)/1000-.5)*k]}
+function pinPos(p){if(p.x!=null&&p.y!=null)return{x:p.x,y:p.y};const m=p.city&&MUNI[p.city];const c=m?m.c:PREF_C[p.pref];if(!c)return null;const[j,k]=jitter(p.id||"x",m?Math.min(2,Math.sqrt(m.a)*.4):5);return{x:c.x+j,y:c.y+k}}
+function prefFill(n){return n<=0?"":n<=2?"var(--pf-1)":n<=5?"var(--pf-2)":n<=10?"var(--pf-3)":"var(--pf-4)"}
+function fillFor(n){return n<=0?"":n===1?"var(--map-1)":n<=3?"var(--map-2)":n<=6?"var(--map-3)":"var(--map-4)"}
+const FULL={x:40,y:8,w:590,h:605};
+let curVB={...FULL};
+function setVB(svg,vb){curVB=vb;svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);svg.classList.toggle("zoomed",vb.w<FULL.w*.6)}
+function fitBox(b,ar,padK=.18,minW=12){let w=Math.max(b.w,minW),h=Math.max(b.h,minW/ar);const pad=Math.max(w,h)*padK;w+=pad*2;h+=pad*2;if(w/h>ar)h=w/ar;else w=h*ar;return{x:b.x+b.w/2-w/2,y:b.y+b.h/2-h/2,w,h}}
+function prefBox(id){const B=PREF_BOX[id];return B?{x:B.x0,y:B.y0,w:B.x1-B.x0,h:B.y1-B.y0}:null}
+function zoomTo(pref,city){const b=city&&MUNI[city]?MUNI[city].b:prefBox(pref);if(!b)return;setVB($("#bigMap"),fitBox(b,FULL.w/FULL.h,city?.6:.12,city?25:12))}
+function renderMap(){
+  const svg=$("#bigMap");const all=visiblePosts();// "only me" always means my own real posts, even while the sample feed is showing
+  const meOnly=S.mapWho==="me";const posts=meOnly?(S.me?(S.postsBy[S.me]||[]).slice():[]):all;const counts={};
+  $("#mapWho").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.who===(S.mapWho||"all"))));const prefs=new Set();const pc={};
+  for(const p of posts){prefs.add(p.pref);pc[p.pref]=(pc[p.pref]||0)+1;if(p.city)counts[p.city]=(counts[p.city]||0)+1}
+  // a city with posts takes the warm city shade; every other city in the prefecture shows the prefecture's green shade
+  svg.querySelectorAll(".muni").forEach(e=>{const n=counts[e.dataset.code];e.style.fill=n?fillFor(n):prefFill(pc[e.dataset.pref]||0)});
+  // visited prefectures get a thick outline: copies drawn underneath stick out past the coast and borders
+  const hk=[...prefs].sort().join(",");const halo=svg.querySelector(".halo");if(halo.dataset.k!==hk){halo.dataset.k=hk;halo.textContent="";
+    for(const pr of prefs)for(const m of MUNIS_BY_PREF[pr]||[])halo.append(sv("path",{d:m.d}))}
+  // want-to-go shops as hollow markers
+  const wants=svg.querySelector(".wants");wants.textContent="";const wr=Math.max(.4,6*curVB.w/FULL.w);const vis=new Map(posts.map(p=>[pkey(p),p]));
+  for(const sv0 of Object.values(S.saves)){if(sv0.done)continue;const p=vis.get(sv0.author+"_"+sv0.pid)||{...sv0,id:sv0.pid};const pos=pinPos(p);if(!pos)continue;
+    wants.append(sv("circle",{cx:pos.x,cy:pos.y,r:wr,class:"want","stroke-width":"2.2px"}))}
+  renderRanking(all);
+  svg.querySelectorAll(".muni.sel").forEach(e=>e.classList.remove("sel"));
+  if(S.mapCity){const e=svg.querySelector(`[data-code="${S.mapCity}"]`);if(e)e.classList.add("sel")}
+  const pins=svg.querySelector(".pins");pins.textContent="";const r=Math.max(.35,5*curVB.w/FULL.w);
+  for(const p of posts){const pos=pinPos(p);if(!pos)continue;pins.append(sv("circle",{cx:pos.x,cy:pos.y,r,class:"pin",fill:colorOf(p.author),"stroke-width":"1.2px"}))}
+  const st=$("#mapStats");st.textContent="";
+  st.append(stat(Object.keys(counts).length,"制覇した市区町村"),stat(prefs.size+"/47","都道府県"),stat(posts.length,"行ったお店"));
+  $("#zoomOut").hidden=!S.mapPref;
+  const list=$("#prefList");list.textContent="";
+  if(S.mapPref){const ps=posts.filter(p=>p.pref===S.mapPref&&(!S.mapCity||p.city===S.mapCity));
+    const crumb=el("div",{class:"crumb"},el("button",{class:"linkish",onclick:()=>{S.mapCity=null;zoomTo(S.mapPref);renderMap()},text:PREF_NAMES[+S.mapPref-1]}),S.mapCity?el("span",{text:"› "+cityName(S.mapCity)}):el("span",{text:"・市区町村をタップでしぼりこみ"}));
+    list.append(crumb,el("h2",{style:"font-size:17px;margin:6px 0 8px",text:`${S.mapCity?cityName(S.mapCity):PREF_NAMES[+S.mapPref-1]}のお店（${ps.length}）`}));
+    if(!ps.length)list.append(el("p",{class:"empty card",text:"まだだれも行ってないみたい。最初の1軒を投稿してみよう"}));
+    else{const box=el("div",{style:"display:flex;flex-direction:column;gap:14px"});ps.forEach(p=>box.append(postCard(p)));list.append(box)}}
+}
+// ---------- conquest ranking: me + mutual friends by distinct cities ----------
+function renderRanking(posts){const box=$("#rankList");if(!box)return;box.textContent="";
+  const ids=S.sample?[...new Set(posts.map(p=>p.author))]:[...(S.me?[S.me]:[]),...mutualIds()];const by={};
+  for(const p of posts){const r=by[p.author]=by[p.author]||{c:new Set(),pf:new Set()};if(p.city)r.c.add(p.city);r.pf.add(p.pref)}
+  const rows=ids.map(id=>({id,c:by[id]?by[id].c.size:0,pf:by[id]?by[id].pf.size:0})).sort((a,b)=>b.c-a.c||b.pf-a.pf);
+  if(!rows.length){box.append(el("p",{class:"empty",text:"相互フォローの友だちができると、制覇した市区町村の数をくらべられるよ"}));return}
+  let no=0,prev=null;rows.forEach((r,i)=>{if(r.c!==prev){no=i+1;prev=r.c}const me=r.id===S.me&&!S.sample;
+    box.append(el("div",{class:"rank"+(no===1&&r.c?" top":"")+(me?" me":"")},el("span",{class:"no",text:String(no)}),avatar(r.id),
+      el("div",{class:"txt"},el("b",{text:me?"自分":nick(r.id)}),el("small",{text:`${r.pf}都道府県`})),el("span",{class:"n"},String(r.c),el("small",{text:"市区町村"}))))})}
+// ---------- the same shop posted by several people ----------
+function shopKey(p){return normName(p.name)+"|"+(p.city||p.pref)}
+function shopGroup(p){const k=shopKey(p);if(S.shopsFor!==S.postsVer){S.shopsFor=S.postsVer;S.shops=new Map();for(const q of visiblePosts()){const kk=shopKey(q);if(!S.shops.has(kk))S.shops.set(kk,[]);S.shops.get(kk).push(q)}}
+  return S.shops.get(k)||[p]}
+function openShop(p){const list=shopGroup(p).slice().sort((a,b)=>b.createdAt-a.createdAt);const m=$("#modal");m.textContent="";
+  const avg=list.reduce((a,q)=>a+(q.rate||0),0)/list.length;
+  const box=el("div",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:p.name}),el("p",{class:"sub",text:`${placeLabel(p)}・${new Set(list.map(q=>q.author)).size}人が投稿・満足度の平均 ${avg.toFixed(1)}`}));
+  for(const q of list)box.append(el("button",{type:"button",class:"item",style:"background:none;border:0;border-top:1px solid var(--line);width:100%;text-align:left;color:inherit;font:inherit",onclick:()=>{m.hidden=true;openViewer(0,q.id)}},
+    avatar(q.author),el("div",{class:"txt"},el("b",{text:(q.author===S.me&&!q.sample?"自分":nick(q.author))+`・満足度${q.rate||0}`}),el("small",{text:(q.comment||"ひとことなし")+"・"+ago(q.createdAt)}))));
+  box.append(el("button",{type:"button",class:"btn ghost",style:"margin-top:12px",onclick:()=>{m.hidden=true},text:"閉じる"}));m.append(box);m.hidden=false}
+$("#mapWho").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.mapWho=b.dataset.who;renderMap()});
+function onBigMapClick(ev){const t=ev.target.closest&&ev.target.closest(".muni");if(!t)return;const pref=t.dataset.pref,code=t.dataset.code;
+  if(S.mapPref!==pref){S.mapPref=pref;S.mapCity=null;zoomTo(pref)}else{S.mapCity=S.mapCity===code?null:code}renderMap()}
+// Google Maps: links only (the page cannot call Google). Coordinates are read from a pasted full link when present.
+function safeGmap(u){try{const x=new URL(u.trim());if(x.protocol!=="https:")return null;const h=x.hostname;if(/(^|\.)google\.(com|co\.jp|jp)$/.test(h)&&(x.pathname.startsWith("/maps")||h.startsWith("maps.")))return x.href;if(h==="maps.app.goo.gl"||h==="goo.gl")return x.href;return null}catch(e){return null}}
+function gmapCoords(u){let t=u;try{t=decodeURIComponent(u)}catch(e){}const pats=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|center|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/];
+  for(const re of pats){const m=t.match(re);if(m){const lat=+m[1],lon=+m[2];if(lat>20&&lat<46.5&&lon>122&&lon<154)return{lat,lon}}}return null}
+// Shop name matching: NFKC, lower case, katakana folded to hiragana, spaces and symbols dropped.
+function normName(t){return (t||"").normalize("NFKC").toLowerCase().replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).replace(/[\s・\-ー－_.,、。()（）「」]/g,"")}
+// Address -> municipality, using the names on the map. Prefers a match inside the prefecture the address names.
+const MUNI_LIST=Object.values(MUNI).sort((a,b)=>b.name.length-a.name.length);
+function parseAddress(t){t=(t||"").normalize("NFKC").replace(/\s/g,"");if(!t)return null;
+  let pref=null,rest=t;const pi=PREF_NAMES.findIndex(n=>t.startsWith(n)||t.startsWith(n.replace(/[都府県]$/,""))&&n!=="北海道");
+  if(pi>=0)pref=String(pi+1).padStart(2,"0");
+  let best=null;
+  for(const m of MUNI_LIST){if(pref&&m.pref!==pref)continue;const i=rest.indexOf(m.name);if(i<0)continue;
+    // earliest match wins, so "大阪市北区" is 大阪市 and not a ward named 北区; longer names break ties
+    const score=-i*10+m.name.length;if(!best||score>best.score)best={m,score}}
+  if(best)return{pref:best.m.pref,city:best.m.code};
+  return pref?{pref,city:null}:null}
+function tabelogSearchUrl(name,place){return"https://www.google.com/search?q="+encodeURIComponent((name+" "+(place||"")).trim()+" site:tabelog.com")}
+function gmapSearchUrl(name,place){return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((name+" "+(place||"")).trim())}
+function stat(v,l){return el("div",{class:"stat"},el("b",{text:String(v)}),el("small",{text:l}))}
+
+// ---------- rendering ----------
+function bowl(on){const s=sv("svg",{viewBox:"0 0 24 24","aria-hidden":"true"});s.append(sv("path",{d:"M2 11h20a10 8.5 0 0 1-20 0z",fill:on?"var(--yolk)":"var(--line)"}),sv("path",{d:"M4.5 11c1.5-3.5 4.5-5 7.5-5s6 1.5 7.5 5",fill:on?"#fff":"var(--surface)",stroke:on?"var(--yolk)":"var(--line)","stroke-width":"1"}));return s}
+function hara(n){const w=el("span",{class:"hara","aria-label":`満足度 ${n}/5`},el("span",{class:"lbl",text:"満足度"}));for(let i=1;i<=5;i++)w.append(bowl(i<=n));return w}
+function iconOf(id){const u=S.profiles[id]&&S.profiles[id].icon;return typeof u==="string"&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:null}
+function avatar(id,big,src){const u=src!==undefined?src:iconOf(id);const c="av"+(big?" big":"");if(u)return el("img",{class:c,src:u,alt:""});return el("div",{class:c,style:`background:${colorOf(id)}`,text:(nick(id)||"?").slice(0,1)})}
+// square center crop for profile icons
+function shrinkIcon(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{const k=Math.min(img.width,img.height);const c=document.createElement("canvas");c.width=c.height=256;
+  c.getContext("2d").drawImage(img,(img.width-k)/2,(img.height-k)/2,k,k,0,0,256,256);URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",.82))};img.onerror=rej;img.src=url})}
+// data URLs (local/sample) or signed Storage URLs from Supabase
+const okImg=u=>typeof u==="string"&&(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)||/^https?:\/\/[^\s"<>]+$/.test(u));
+function photosOf(p){return [p.photo,...(Array.isArray(p.more)?p.more:[])].filter(okImg).slice(0,3)}
+// up to 4 photos: swipe sideways, counter in the corner
+// photos 2-4 of new posts live in their own docs (posts/<uid>/pics/<pid>_<n>) so each can stay sharp under the 256KB doc limit
+const PICS=new Map();
+function getPics(p){const n=Math.min(2,p.pics|0);if(!n||!S.db||p.sample)return Promise.resolve([]);const k=`${p.author}/${p.id}/${p.picsAt||0}`;
+  if(!PICS.has(k))PICS.set(k,Promise.all(Array.from({length:n},(_,i)=>S.db.doc(`posts/${p.author}/pics/${p.id}_${i+1}`).get().then(g=>{const d=g.exists&&g.data();return d&&okImg(d.d)?d.d:null}).catch(()=>null))));
+  return PICS.get(k)}
+function photoAttrs(p){const ar=+p.ar;return ar>.3&&ar<4?{style:`aspect-ratio:${ar}`}:{class:"photo legacy"}}
+function gallery(p){const legacy=photosOf(p);const n=p.pics?1+Math.min(2,p.pics|0):legacy.length;if(n<2||!p.photo)return photoEl(p);
+  const cnt=el("span",{class:"cnt",text:`1/${n}`});const a=photoAttrs(p);
+  const imgs=Array.from({length:n},(_,i)=>el("img",{class:a.class||"photo",style:a.style||"",src:p.pics?(i?"data:image/gif;base64,R0lGODlhAQABAAAAACw=":p.photo):legacy[i],alt:`${p.name}の写真 ${i+1}/${n}`,loading:"lazy"}));
+  if(p.pics)getPics(p).then(list=>list.forEach((u,i)=>{if(u&&imgs[i+1])imgs[i+1].src=u}));
+  const sc=el("div",{class:"sc"},...imgs);
+  // tap the left or right edge to go back / forward, like Instagram stories
+  const at=()=>Math.round(sc.scrollLeft/sc.clientWidth);const goTo=i=>{i=Math.max(0,Math.min(n-1,i));sc.scrollTo({left:i*sc.clientWidth,behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})};
+  const prev=el("button",{type:"button",class:"gnav prev","aria-label":"前の写真",onclick:()=>goTo(at()-1)},el("span",{"aria-hidden":"true",text:"‹"}));
+  const next=el("button",{type:"button",class:"gnav next","aria-label":"次の写真",onclick:()=>goTo(at()+1)},el("span",{"aria-hidden":"true",text:"›"}));
+  const sync=()=>{const i=at();cnt.textContent=`${i+1}/${n}`;prev.hidden=i<=0;next.hidden=i>=n-1};
+  sc.addEventListener("scroll",sync,{passive:true});prev.hidden=true;
+  return el("div",{class:"gal"},sc,prev,next,cnt)}
+function photoEl(p,cls="photo"){if(p.photo){if(cls==="photo"){const a=photoAttrs(p);return el("img",{class:a.class||"photo",style:a.style||"",src:p.photo,alt:p.name+"の写真",loading:"lazy"})}return el("img",{class:cls,src:p.photo,alt:p.name+"の写真",loading:"lazy"})}const g=GMAP[p.genre]||GENRES[7];return el("div",{class:"ph"+(cls==="thumb"?" thumb":""),style:`background:${g[2]}`,"aria-hidden":"true",text:g[1]})}
+function postCard(p){
+  const mine=p.author===S.me&&!p.sample;
+  return el("article",{class:"card post"},
+    el("div",{class:"head"},el("button",{type:"button",style:"background:none;border:0;padding:0;border-radius:50%;min-width:44px;min-height:44px;display:grid;place-items:center","aria-label":nick(p.author)+"の投稿をまとめて見る",onclick:()=>openViewer(0,p.id)},avatar(p.author)),el("div",{class:"who"},el("b",{text:mine?nick(p.author)+"（自分）":nick(p.author)}),el("small",{text:ago(p.createdAt)+(p.updatedAt?"・編集済み":"")})),p.sample?el("span",{class:"sample-flag",style:"margin-left:auto",text:"サンプル"}):null),
+    gallery(p),
+    el("div",{class:"body"},
+      el("h3",{class:"shop",text:p.name}),
+      el("div",{class:"meta"},el("span",{class:"chip pref",text:placeLabel(p)}),el("span",{class:"chip",text:p.genre}),p.price?el("span",{text:p.price}):null),
+      p.addr?el("p",{class:"addr",text:p.addr}):null,
+      hara(p.rate||0),
+      p.comment?el("p",{class:"comment",text:p.comment}):null,
+      (g=>g.length>1?el("button",{type:"button",class:"shopline",onclick:()=>openShop(p)},`${new Set(g.map(q=>q.author)).size}人が投稿・平均の満足度`,el("b",{text:(g.reduce((a,q)=>a+(q.rate||0),0)/g.length).toFixed(1)}),el("span",{style:"margin-left:auto;white-space:nowrap",text:"見る ›"})):null)(shopGroup(p)),
+      postActs(p),
+      el("div",{class:"row-gap",style:"gap:16px"},mine?el("button",{class:"linkish",onclick:()=>{closeViewer();window.startEdit(p)},text:"編集"}):null,el("button",{class:"linkish",onclick:()=>{closeViewer();S.mapPref=p.pref;S.mapCity=p.city||null;go("map");zoomTo(p.pref,p.city);renderMap()},text:"地図で見る"}),
+        el("a",{class:"gm",href:(p.gmap&&safeGmap(p.gmap))||gmapSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"Googleマップで開く"}),
+        el("a",{class:"gm",href:tabelogSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"食べログで探す"}))));
+}
+const IC={heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'};
+function ic(n,fill){const s=sv("svg",{viewBox:"0 0 24 24",fill:fill?"currentColor":"none",stroke:"currentColor","stroke-width":"2","stroke-linejoin":"round","aria-hidden":"true"});s.innerHTML=IC[n];return s}
+function reactsOf(p){const out=[];const ok=new Set([S.me,...mutualIds()]);for(const[uid,list]of Object.entries(S.reacts))if(ok.has(uid))for(const r of list)if(r.to===p.author&&r.pid===p.id)out.push({...r,by:uid});return out}
+function postActs(p){
+  const rs=p.sample?[]:reactsOf(p);const likes=rs.filter(r=>r.kind==="like");const cm=rs.filter(r=>r.kind==="c");
+  const liked=likes.some(r=>r.by===S.me);const saved=!!S.saves["s_"+pkey(p)];
+  const who=likes.map(r=>r.by===S.me?"自分":nick(r.by)).slice(0,3).join("・");
+  return el("div",{class:"acts"},
+    el("button",{type:"button",class:"act like","aria-pressed":liked?"true":"false","aria-label":`おいしそう ${likes.length}`,title:who||"おいしそう",onclick:()=>toggleLike(p,liked)},ic("heart",liked),String(likes.length)),
+    el("button",{type:"button",class:"act","aria-label":`コメント ${cm.length}`,onclick:()=>openComments(p)},ic("chat"),String(cm.length)),
+    el("button",{type:"button",class:"act","aria-pressed":saved?"true":"false","aria-label":saved?"行きたいリストに入ってる":"行きたいリストに入れる",onclick:()=>toggleSave(p,saved)},ic("star",saved),"行きたい"),
+    likes.length?el("small",{class:"sub",text:who+(likes.length>3?" ほか":"")+" がおいしそう"}):null)}
+function needLive(p){if(p.sample||!S.me){toast(S.sample?"サンプルの投稿には使えないよ":"ログインして開くと使えるよ");return false}return true}
+async function toggleLike(p,liked){if(!needLive(p))return;const ref=S.db.doc(`reacts/${S.me}/items/l_${pkey(p)}`);
+  try{if(liked)await ref.delete();else await ref.set({kind:"like",to:p.author,pid:p.id,at:Date.now()})}catch(e){writeErr(e)}}
+async function toggleSave(p,saved){if(!needLive(p))return;const ref=S.db.doc(`data/users/${S.me}/s_${pkey(p)}`);
+  try{if(saved){await ref.delete();toast("行きたいリストから外したよ")}else{await ref.set({author:p.author,pid:p.id,name:p.name,pref:p.pref,city:p.city||null,genre:p.genre,at:Date.now(),done:false});toast("行きたいリストに入れたよ")}}catch(e){writeErr(e)}}
+function openComments(p){if(!needLive(p))return;S.cmtFor=p;S.replyTo=null;const m=$("#modal");m.textContent="";
+  const list=el("div",{id:"cmtList"});const inp=el("input",{type:"text",maxlength:"200",placeholder:"ひとことコメント","aria-label":"コメント"});const err=el("p",{class:"err",hidden:true});
+  const f=el("form",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:p.name}),el("p",{class:"sub",text:"コメントは相互フォローの友だちにだけ見えるよ"}),list,err,
+    el("div",{id:"replyChip",hidden:true}),el("div",{class:"row-gap",style:"flex-wrap:nowrap"},inp,el("button",{class:"btn yolk small",type:"submit",style:"flex:none;white-space:nowrap",text:"送る"})),
+    el("button",{type:"button",class:"btn ghost",onclick:()=>{m.hidden=true;S.cmtFor=null},text:"閉じる"}));
+  f.onsubmit=async ev=>{ev.preventDefault();const t=inp.value.trim();if(!t)return;inp.value="";
+    const rt=S.replyTo;const d={kind:"c",to:p.author,pid:p.id,text:t,at:Date.now()};if(rt){d.re=rt.re;d.reTo=rt.by}
+    try{await S.db.doc(`reacts/${S.me}/items/c_${Date.now().toString(36)}`).set(d);S.replyTo=null;renderComments()}catch(e){writeErr(e);inp.value=t}};
+  m.append(f);m.hidden=false;renderComments();setTimeout(()=>inp.focus(),50)}
+function renderComments(){const p=S.cmtFor;const box=$("#cmtList");if(!p||!box||$("#modal").hidden)return;box.textContent="";
+  const cm=reactsOf(p).filter(r=>r.kind==="c").sort((a,b)=>a.at-b.at);
+  if(!cm.length)box.append(el("p",{class:"empty",text:"まだコメントはないよ"}));
+  const ids=new Set(cm.map(r=>r.id));const isTop=r=>!r.re||!ids.has(r.re);
+  const row=(r,reply)=>el("div",{class:"cmt"+(reply?" reply":"")},avatar(r.by),el("div",{class:"txt"},el("b",{text:r.by===S.me?"自分":nick(r.by)}),
+    reply&&r.reTo&&r.reTo!==r.by?el("span",{class:"at",text:"@"+(r.reTo===S.me?"自分":nick(r.reTo))+" "}):null,r.text,el("div",{},el("small",{text:ago(r.at)}),
+    el("button",{class:"linkish",style:"margin-left:10px;font-size:12px",onclick:()=>{S.replyTo={re:reply?r.re:r.id,by:r.by};renderComments();const i=$("#modal input[type=text]");if(i)i.focus()},text:"返信"}),
+    r.by===S.me?el("button",{class:"linkish",style:"margin-left:6px;font-size:12px",onclick:async()=>{try{await S.db.doc(`reacts/${S.me}/items/${r.id}`).delete()}catch(e){writeErr(e)}},text:"消す"}):null)));
+  for(const r of cm.filter(isTop)){box.append(row(r,false));for(const x of cm.filter(x=>x.re===r.id))box.append(row(x,true))}
+  const chip=$("#replyChip");if(chip){chip.textContent="";chip.hidden=!S.replyTo;
+    if(S.replyTo)chip.append(el("span",{class:"chip",text:`↳ ${S.replyTo.by===S.me?"自分":nick(S.replyTo.by)}さんに返信`}),el("button",{type:"button",class:"linkish",style:"font-size:12px;margin-left:6px","aria-label":"返信をやめる",onclick:()=>{S.replyTo=null;renderComments()},text:"やめる"}))}}
+const PRICES=["〜¥1,000","¥1,000〜3,000","¥3,000〜6,000","¥6,000〜"];
+function applyFilters(list){const q=S.q.trim().toLowerCase();let out=list;
+  if(q)out=out.filter(p=>[p.name,placeLabel(p),p.addr,p.comment,p.genre,nick(p.author)].filter(Boolean).join(" ").toLowerCase().includes(q));
+  if(S.price)out=out.filter(p=>p.price===S.price);
+  if(S.sort==="rate")out=[...out].sort((a,b)=>(b.rate||0)-(a.rate||0)||b.createdAt-a.createdAt);
+  else if(S.sort==="cheap")out=[...out].sort((a,b)=>{const ia=PRICES.indexOf(a.price),ib=PRICES.indexOf(b.price);return (ia<0?9:ia)-(ib<0?9:ib)||b.createdAt-a.createdAt});
+  return out}
+$("#fq").addEventListener("input",e=>{S.q=e.target.value;renderFeed()});
+$("#fsort").addEventListener("change",e=>{S.sort=e.target.value;renderFeed()});
+$("#fprice").addEventListener("change",e=>{S.price=e.target.value;renderFeed()});
+function renderFeed(){S.postsVer=(S.postsVer||0)+1;
+  const n=$("#feedNotice");n.textContent="";const list=$("#feedList");list.textContent="";
+  if(!S.ready&&!S.offline){list.append(el("p",{class:"empty",text:"読み込み中…"}));return}
+  if(S.sample){n.append(el("div",{class:"banner"},el("p",{},el("span",{class:"sample-flag",text:"サンプル表示中"})," 例のお店と例の友だちだよ。実際のデータではありません。"),el("div",{},el("button",{class:"btn small ghost",onclick:()=>{S.sample=false;renderAll()},text:"サンプルを閉じる"}))))}
+  else if(S.offline){n.append(el("div",{class:"banner"},el("p",{text:"ログインすると、投稿や相互フォローが使えるよ。"}),el("div",{class:"row-gap",style:"flex-direction:row;gap:8px"},el("button",{class:"btn small",onclick:()=>showAuth("login"),text:"ログイン"}),el("button",{class:"btn small yolk",onclick:()=>{S.sample=true;renderAll()},text:"サンプルを見てみる"}))))}
+  else if(!mutualIds().length){n.append(el("div",{class:"banner"},el("p",{text:"まだ相互フォローの友だちがいないよ。「ともだち」でフォローして、フォローを返してもらおう。"}),el("div",{class:"row-gap"},el("button",{class:"btn small",onclick:()=>go("friends"),text:"ともだちを探す"}),el("button",{class:"btn small ghost",onclick:()=>{S.sample=true;renderAll()},text:"サンプルを見てみる"}))))}
+  const posts=visiblePosts();renderStories(posts);
+  $("#pickBox").hidden=$("#ringBox").hidden=false;$("#filters").hidden=!posts.length;
+  renderPicks(posts);renderRing(posts);
+  if(!posts.length){$("#tlTitle").textContent="タイムライン";if(!S.offline)list.append(el("p",{class:"empty card",text:"まだ投稿がないよ。下の「＋」から最初のお店を投稿してみよう"}));return}
+  const g=RING[S.genreIdx];const shown=applyFilters(g.all?posts:posts.filter(p=>(GMAP[p.genre]?p.genre:"その他")===g.name));
+  $("#tlTitle").textContent=(g.all?"タイムライン":`${g.name}のお店`)+(S.q||S.price?`（${shown.length}件）`:"");
+  if(!shown.length)list.append(el("p",{class:"empty card",text:S.q||S.price?"条件に合うお店が見つからなかった":`${g.name}の投稿はまだないよ`}));
+  shown.forEach(p=>{const c=postCard(p);c.id="post-"+p.id;list.append(c)});
+}
+// ---------- friends' latest posts (newest first) + post viewer ----------
+function storyPeople(posts){const latest=new Map();for(const p of posts)if(!latest.has(p.author)||latest.get(p.author)<p.createdAt)latest.set(p.author,p.createdAt);
+  return [...latest.entries()].sort((a,b)=>b[1]-a[1]).map(([id,t])=>({id,t,posts:posts.filter(p=>p.author===id).sort((a,b)=>b.createdAt-a.createdAt)}))}
+const SEEN=(()=>{try{return JSON.parse(localStorage.getItem("hp_seen")||"{}")}catch(e){return{}}})();
+function markSeen(p){if(!p||(SEEN[p.author]||0)>=p.createdAt)return;SEEN[p.author]=p.createdAt;try{localStorage.setItem("hp_seen",JSON.stringify(SEEN))}catch(e){}renderStories(visiblePosts())}
+function renderStories(posts){const box=$("#stories");box.textContent="";const ppl=storyPeople(posts);box.hidden=!ppl.length;
+  ppl.forEach((pp,i)=>{const fresh=Date.now()-pp.t<7*24*3600e3&&pp.t>(SEEN[pp.id]||0);const me=pp.id===S.me&&!S.sample;
+    box.append(el("button",{type:"button",class:"story"+(fresh?" fresh":""),"aria-label":`${me?"自分":nick(pp.id)}の投稿を見る（${ago(pp.t)}）`,onclick:()=>openViewer(i)},
+      el("span",{class:"ringav"},avatar(pp.id)),el("b",{text:me?"自分":nick(pp.id)}),el("small",{text:ago(pp.t)})))})}
+const V={open:false,people:[],pi:0,k:0};
+function openViewer(pi,postId){V.people=storyPeople(visiblePosts());if(!V.people.length)return;V.pi=Math.max(0,Math.min(pi,V.people.length-1));V.k=0;
+  if(postId){for(let i=0;i<V.people.length;i++){const k=V.people[i].posts.findIndex(p=>p.id===postId);if(k>=0){V.pi=i;V.k=k;break}}}
+  V.open=true;const v=$("#viewer");v.classList.remove("leave");v.hidden=false;v.classList.remove("show");void v.offsetWidth;v.classList.add("show");renderViewer(false);setTimeout(()=>{const b=v.querySelector(".vclose");if(b)b.focus()},30)}
+function closeViewer(){if(!V.open)return;V.open=false;const v=$("#viewer");v.classList.remove("show");v.classList.add("leave");setTimeout(()=>{if(!V.open){v.hidden=true;v.classList.remove("leave")}},120)}
+function stepViewer(d){const pp=V.people[V.pi];if(!pp)return;let k=V.k+d,pi=V.pi;
+  if(k>=pp.posts.length){pi++;k=0}else if(k<0){pi--;k=pi>=0?V.people[pi].posts.length-1:0}
+  if(pi<0||pi>=V.people.length){closeViewer();return}V.pi=pi;V.k=k;renderViewer(true)}
+function renderViewer(anim){if(!V.open)return;const v=$("#viewer");
+  // keep people/posts fresh after likes, comments or new posts arrive
+  const cur=V.people[V.pi]&&V.people[V.pi].posts[V.k];V.people=storyPeople(visiblePosts());
+  if(cur){for(let i=0;i<V.people.length;i++){const k=V.people[i].posts.findIndex(p=>p.id===cur.id&&p.author===cur.author);if(k>=0){V.pi=i;V.k=k;break}}}
+  const pp=V.people[V.pi];if(!pp){closeViewer();return}const p=pp.posts[Math.min(V.k,pp.posts.length-1)];
+  markSeen(p);const prog=el("div",{class:"prog","aria-hidden":"true"});pp.posts.forEach((_,i)=>prog.append(el("i",{class:i<=V.k?"on":""})));
+  const body=el("div",{class:"vbody"+(anim?" vswap":"")},postCard(p));
+  const sheet=el("div",{class:"sheetv"},el("div",{class:"vbar"},el("button",{type:"button","aria-label":"前の投稿",onclick:()=>stepViewer(-1),text:"‹"}),prog,
+    el("small",{class:"sub",text:`${pp.id===S.me&&!S.sample?"自分":nick(pp.id)} ${V.k+1}/${pp.posts.length}`}),
+    el("button",{type:"button","aria-label":"次の投稿",onclick:()=>stepViewer(1),text:"›"}),el("button",{type:"button",class:"vclose","aria-label":"閉じる",onclick:closeViewer,text:"×"})),body);
+  const top=v.querySelector(".sheetv");const keep=top?top.scrollTop:0;v.textContent="";v.append(sheet);if(!anim)sheet.scrollTop=keep}
+$("#viewer").addEventListener("click",e=>{if(e.target.id==="viewer")closeViewer()});
+document.addEventListener("keydown",e=>{if(!V.open||!$("#modal").hidden)return;if(e.key==="Escape")closeViewer();else if(e.key==="ArrowRight")stepViewer(1);else if(e.key==="ArrowLeft")stepViewer(-1)});
+{let sx=null,sy=null;const v=$("#viewer");v.addEventListener("touchstart",e=>{if(e.target.closest&&e.target.closest(".gal")){sx=null;return}sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  v.addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)stepViewer(dx<0?1:-1)},{passive:true})}
+// ---------- H: weekend pick rail ----------
+function renderPicks(posts){
+  const picks=[...posts].sort((a,b)=>(b.rate||0)-(a.rate||0)||b.createdAt-a.createdAt).slice(0,6);
+  const key=picks.map(p=>p.id+":"+(p.updatedAt||0)).join(",");
+  S.picks=picks;if(S.pickKey===key){syncPick();return}S.pickKey=key;S.pickIdx=0;
+  const rail=$("#pickRail");rail.textContent="";rail.scrollLeft=0;const dots=$("#pickDots");dots.textContent="";
+  if(!picks.length){
+    // empty state: example cards so a new person sees what the feed becomes
+    const go1=()=>{if(window.newPost)window.newPost();if(S.me)go("post");else toast(S.offline?"ログインすると投稿できるよ":"読み込み中だよ、ちょっと待ってね")};
+    rail.append(el("button",{type:"button",class:"pc on",style:"background:var(--noren);color:var(--surface)",onclick:go1},el("span",{class:"k","aria-hidden":"true",text:"＋"}),el("b",{text:"最初の1軒を投稿しよう"}),el("small",{text:"友だちの満足度が高い順にここに並ぶよ"})),
+      ...[["麺","ラーメン","#b6532f"],["鮨","寿司","#3f7871"],["珈","カフェ","#896046"]].map(([k,n,c])=>el("div",{class:"pc","aria-hidden":"true",style:`background:${c};opacity:.45`},el("span",{class:"k",text:k}),el("b",{text:"友だちの"+n}),el("small",{text:"例"}))));
+    $("#pickName").textContent="まだおすすめはないよ";const g=$("#pickGo");g.removeAttribute("href");g.textContent="投稿する";g.onclick=e=>{e.preventDefault();go1()};g.setAttribute("role","button");g.setAttribute("href","#");return}
+  {const g=$("#pickGo");g.onclick=null;g.removeAttribute("role");g.textContent="ここに決めた"}
+  picks.forEach((p,i)=>{const g=GMAP[p.genre]||GENRES[7];
+    const card=el("button",{type:"button",class:"pc"+(p.photo?" has-photo":""),style:`background:${g[2]}`,"aria-label":`${p.name}（${placeLabel(p)}）の投稿を開く`,
+      onclick:()=>{if(S.pickIdx!==i){card.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});return}openViewer(0,p.id)}},
+      p.photo?el("img",{src:p.photo,alt:"",loading:"lazy"}):el("span",{class:"k","aria-hidden":"true",text:g[1]}),
+      el("b",{text:p.name}),el("small",{text:`${placeLabel(p)}・${nick(p.author)}・満足度${p.rate||0}`}));
+    rail.append(card);dots.append(el("i"))});
+  syncPick();
+}
+function syncPick(){const p=S.picks[S.pickIdx]||S.picks[0];if(!p)return;
+  [...$("#pickRail").children].forEach((c,i)=>c.classList.toggle("on",i===S.pickIdx));
+  [...$("#pickDots").children].forEach((d,i)=>d.classList.toggle("on",i===S.pickIdx));
+  $("#pickName").textContent=p.name;$("#pickGo").href=(p.gmap&&safeGmap(p.gmap))||gmapSearchUrl(p.name,placeLabel(p));$("#pickGo").setAttribute("aria-label",p.name+"に決めた（Googleマップで開く）")}
+$("#pickRail").addEventListener("scroll",()=>{const r=$("#pickRail");const mid=r.scrollLeft+r.clientWidth/2;let best=0,bd=1e9;
+  [...r.children].forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<bd){bd=d;best=i}});
+  if(best!==S.pickIdx){S.pickIdx=best;syncPick()}},{passive:true});
+// ---------- I: genre revolver ----------
+// genre pictures (style B "ぽってり塗り"): b = cream body, a = accent, l = detail lines; source: design-ideas/genre-icons/build.js
+const GENRE_ICON={
+all:{acc:"#f5c862",svg:`<circle class="b" cx="33" cy="33" r="17"/><circle class="a" cx="33" cy="33" r="10"/><path class="l" d="M8 14v10M12 14v10M10 14v38M8 24h4"/><path class="l" d="M55 14c-4 5-4 14 0 18v20"/>`},
+ramen:{acc:"#f5c862",svg:`<path class="l" d="M29 4l7 24M37 3l5 25"/><path class="l" d="M32 16c-3 4 3 7 0 11M38 16c-3 4 3 7 0 11"/><path class="b" d="M7 29h50a25 19 0 0 1-50 0z"/><path class="b" d="M24 48h16l-2 6H26z"/><circle class="a" cx="20" cy="34" r="5"/><path class="l thin" d="M20 32a2 2 0 1 1-2 2"/>`},
+sushi:{acc:"#f2a07b",svg:`<path class="b" d="M11 37c0-6 9-8 21-8s21 2 21 8v6c0 4-9 7-21 7s-21-3-21-7z"/><path class="a" d="M7 31c5-10 15-13 27-13s20 4 24 11c-5 5-15 7-27 7S12 36 7 31z"/><path class="l thin" d="M23 21l4 11M33 19l3 13M43 21l2 10"/>`},
+yakiniku:{acc:"#d27c63",svg:`<circle class="b" cx="32" cy="32" r="21"/><path class="l thin" d="M15 25h34M12 32h40M15 39h34"/><path class="a" d="M17 25c5-5 13-5 15 0s-3 8-8 8-11-3-7-8z"/><path class="a" d="M33 34c5-4 12-3 13 2s-4 7-9 6-7-5-4-8z"/><path class="l" d="M22 61c-2-3 2-5 0-7M32 62c-2-3 2-5 0-7M42 61c-2-3 2-5 0-7"/>`},
+cafe:{acc:"#c79a6b",svg:`<path class="l" d="M22 19c-3-3 3-6 0-9M30 19c-3-3 3-6 0-9M38 19c-3-3 3-6 0-9"/><path class="b" d="M13 25h32v14a13 13 0 0 1-13 13h-6a13 13 0 0 1-13-13z"/><ellipse class="a" cx="29" cy="27" rx="13" ry="2.6"/><path class="l" d="M45 29h3a6 6 0 0 1 0 12h-4"/><path class="l" d="M8 56h44"/>`},
+teishoku:{acc:"#f5c862",svg:`<path class="l" d="M8 19l46-5"/><rect class="b" x="5" y="24" width="54" height="31" rx="5"/><path class="a" d="M10 33h18a9 9 0 0 1-18 0z"/><path class="a" d="M36 33h18a9 9 0 0 1-18 0z"/><path class="l thin" d="M12 33c2-3 4-3 6 0 2-3 4-3 6 0"/><path class="a" d="M21 48c4-4 12-4 15 0-3 4-11 4-15 0zM36 48l6-3v6z"/>`},
+izakaya:{acc:"#f5c862",svg:`<path class="b" d="M14 22h26v30a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4z"/><path class="a" d="M18 30h18v20H18z"/><path class="b" d="M12 23c0-5 4-8 8-7 2-3 8-4 11-1 4-2 10 1 10 5 0 3-2 5-5 5H17c-3 0-5-1-5-2z"/><path class="l" d="M40 28h5a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5h-5"/><path class="l thin" d="M24 38v2M30 43v2M27 34v1"/>`},
+sweets:{acc:"#e0716f",svg:`<path class="b" d="M9 30L51 19v32H9z"/><path class="l thin" d="M9 40h42"/><path class="a" d="M30 6c-6 0-8 6-5 10l5 5 5-5c3-4 1-10-5-10z"/><path class="l thin" d="M27 7l3 3 3-3"/>`},
+other:{acc:"#3e4a3c",svg:`<path class="b" d="M32 9c7 0 23 26 23 35 0 7-7 9-23 9S9 51 9 44c0-9 16-35 23-35z"/><path class="a" d="M24 39h16v14H24z"/>`},
+};
+const ICON_KEY={"ラーメン":"ramen","寿司":"sushi","焼肉":"yakiniku","カフェ":"cafe","定食":"teishoku","居酒屋":"izakaya","スイーツ":"sweets","その他":"other"};
+function genreIcon(key){const ic=GENRE_ICON[key];const s=sv("svg",{viewBox:"0 0 64 64","aria-hidden":"true",class:"gi",style:`--acc:${ic.acc}`});s.innerHTML=ic.svg;return s}
+const RING=[{name:"すべて",k:"all",color:"var(--yolk)",all:true},...GENRES.map(g=>({name:g[0],k:ICON_KEY[g[0]],color:g[2]}))];
+function renderRing(posts){
+  const ring=$("#ring");const n=RING.length;
+  if(!ring.children.length)RING.forEach((g,i)=>ring.append(el("button",{type:"button",class:g.all?"all":"",role:"option",tabindex:"-1",style:`background:${g.color};--g:${g.color}`,onclick:()=>setGenre(i)},genreIcon(g.k),el("small",{}))));
+  const count=g=>g.all?posts.length:posts.filter(p=>(GMAP[p.genre]?p.genre:"その他")===g.name).length;
+  const step=Math.min(ring.clientWidth*.2||76,90);
+  [...ring.children].forEach((b,i)=>{let d=((i-S.genreIdx)%n+n)%n;if(d>n/2)d-=n;const a=Math.abs(d);const g=RING[i];
+    b.querySelector("small").textContent=`${g.name} ${count(g)}`;
+    b.style.transform=a===0?"translateZ(40px)":`translateX(${d*step*(a>1?.9:1)}px) rotateY(${-Math.sign(d)*(a>1?50:32)}deg) scale(${a>1?.7:.85})`;
+    b.style.opacity=a>2?0:a>1?.5:1;b.style.zIndex=3-a;b.style.pointerEvents=a>2?"none":"";
+    b.classList.toggle("cur",a===0);b.setAttribute("aria-selected",a===0?"true":"false")});
+  const g=RING[S.genreIdx];const list=g.all?posts:posts.filter(p=>(GMAP[p.genre]?p.genre:"その他")===g.name);
+  const names=[...new Set(list.map(p=>p.name))];
+  $("#ringGlass").textContent="";$("#ringGlass").append(el("b",{text:`${g.name} ${list.length}軒`}),el("small",{text:names.length?names.slice(0,2).join("・")+(names.length>2?" ほか":""):"まだないよ"}));
+}
+function setGenre(i){const n=RING.length;S.genreIdx=((i%n)+n)%n;renderFeed()}
+$("#ringPrev").addEventListener("click",()=>setGenre(S.genreIdx-1));
+$("#ringNext").addEventListener("click",()=>setGenre(S.genreIdx+1));
+$("#ring").addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){setGenre(S.genreIdx-1);e.preventDefault()}else if(e.key==="ArrowRight"){setGenre(S.genreIdx+1);e.preventDefault()}});
+{let sx=null;const r=$("#ring");r.addEventListener("pointerdown",e=>{sx=e.clientX});
+  r.addEventListener("pointerup",e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>30){setGenre(S.genreIdx+(dx<0?1:-1));r.dataset.swiped="1";setTimeout(()=>delete r.dataset.swiped,0)}});
+  r.addEventListener("click",e=>{if(r.dataset.swiped){e.stopPropagation();e.preventDefault()}},true)}
+window.addEventListener("resize",()=>{if(S.view==="feed")renderFeed()});
+function relBadge(id){const a=iFollow(id),b=followsMe(id);if(a&&b)return el("span",{class:"badge mutual",text:"相互フォロー"});if(b)return el("span",{class:"badge one",text:"フォローされてる"});if(a)return el("span",{class:"badge one",text:"フォロー中"});return null}
+function friendRow(id,badge,...btns){const prof=S.profiles[id]||{};return el("div",{class:"item"},avatar(id),el("div",{class:"txt"},el("b",{text:nick(id)}),handleOf(id)?el("small",{class:"handle",text:"@"+handleOf(id)}):null,badge?el("div",{},badge):null,prof.bio?el("small",{text:prof.bio}):null),...btns)}
+function renderFriends(){
+  const box=$("#friendList");box.textContent="";const rq=$("#reqList");rq.textContent="";const bl=$("#blockList");bl.textContent="";rq.hidden=bl.hidden=true;
+  renderInvite();
+  if(S.offline||!S.me){box.append(el("p",{class:"empty",text:"ログインすると友だちをフォローできるよ"}));return}
+  const reqs=requestIds();
+  if(reqs.length){rq.hidden=false;rq.append(el("div",{class:"secttl",text:`フォロー申請 ${reqs.length}件（承認すると相互フォローになって投稿が見えるよ）`}));
+    reqs.sort((a,b)=>(S.profiles[b]?.invitedBy===S.me)-(S.profiles[a]?.invitedBy===S.me));
+    for(const id of reqs)rq.append(friendRow(id,S.profiles[id]?.invitedBy===S.me?el("span",{class:"badge inv",text:"あなたの招待で参加"}):null,el("div",{class:"row-gap",style:"gap:6px;flex-wrap:nowrap"},
+      el("button",{class:"btn small yolk",disabled:S.writeBusy,onclick:()=>toggleFollow(id),text:"承認"}),
+      el("button",{class:"btn small ghost",disabled:S.writeBusy,onclick:()=>setRel(id,"decline"),text:"見送る"}))))}
+  const q=$("#fSearch").value.trim().toLowerCase();
+  let ids=Object.keys(S.profiles).filter(id=>id!==S.me&&!reqs.includes(id)&&!iBlocked(id)&&!blockedMe(id)&&(!q||nick(id).toLowerCase().includes(q)||handleOf(id).includes(q.replace(/^@/,""))));
+  const rank=id=>(iFollow(id)&&followsMe(id))?0:followsMe(id)?1:iFollow(id)?2:3;
+  ids.sort((a,b)=>rank(a)-rank(b)||nick(a).localeCompare(nick(b),"ja"));
+  if(!ids.length)box.append(el("p",{class:"empty",text:q?"見つからなかった":"まだほかの人が登録してないよ。上の招待コードを友だちに送ってみよう"}));
+  for(const id of ids){const f=iFollow(id);
+    const blk=el("button",{class:"linkish",style:"font-size:12px;color:var(--muted)",text:"ブロック"});
+    const blkC=()=>el("span",{class:"confirm"},"ブロックする？",el("button",{class:"btn small danger",onclick:()=>{S.confirm=null;setRel(id,"block")},text:"する"}),el("button",{class:"btn small ghost",onclick:()=>{S.confirm=null;renderFriends()},text:"やめる"}));
+    blk.onclick=()=>{S.confirm="blk:"+id;blk.replaceWith(blkC())};
+    box.append(friendRow(id,relBadge(id),el("div",{style:"display:flex;flex-direction:column;align-items:flex-end;gap:6px"},
+      el("button",{class:"btn small"+(f?" ghost":""),style:"white-space:nowrap",disabled:S.writeBusy,onclick:()=>toggleFollow(id),text:f?"フォロー解除":(followsMe(id)?"フォローを返す":"フォロー")}),S.confirm==="blk:"+id?blkC():blk)))}
+  const blocked=(myF().blocked||[]).filter(id=>S.profiles[id]);
+  if(blocked.length){bl.hidden=false;bl.append(el("div",{class:"secttl",text:"ブロック中（お互いの投稿が見えず、フォローもできないよ）"}));
+    for(const id of blocked)bl.append(friendRow(id,null,el("button",{class:"btn small ghost",disabled:S.writeBusy,onclick:()=>setRel(id,"unblock"),text:"ブロック解除"})))}
+}
+function inviteText(code){return `腹ぱんぐらむで一緒においしいお店をシェアしよう！\n${APP_URL}\n開いたら「ともだち」の招待コードに ${code} を入れてね。承認したら相互フォローになるよ`}
+function renderInvite(){const b=$("#inviteBox");b.textContent="";
+  if(S.offline||!S.me){b.hidden=true;return}b.hidden=false;
+  const me=S.profiles[S.me]||{};const code=me.inviteCode;
+  b.append(el("b",{text:"友だちを招待"}),el("p",{class:"sub",text:"コードで入ってくれた友だちは、フォロー申請のいちばん上に「あなたの招待で参加」と出るよ。承認すると相互フォロー"}));
+  if(code)b.append(el("div",{class:"row-gap"},el("span",{class:"code",text:code}),el("button",{class:"btn small yolk",onclick:async()=>{try{await navigator.clipboard.writeText(inviteText(code));toast("招待メッセージをコピーしたよ。LINEなどに貼ってね")}catch(e){toast("コピーできなかった。コードを直接伝えてね")}},text:"招待メッセージをコピー"})));
+  else b.append(el("div",{},el("button",{class:"btn small yolk",disabled:S.writeBusy||!me.nick,onclick:makeInvite,text:"招待コードを作る"})));
+  if(!me.invitedBy){const inp=el("input",{type:"text",maxlength:"8",placeholder:"もらった招待コード","aria-label":"もらった招待コード",autocomplete:"off",style:"text-transform:uppercase"});
+    b.append(el("form",{class:"row-gap",style:"flex-direction:row;flex-wrap:nowrap;gap:8px",onsubmit:ev=>{ev.preventDefault();useInvite(inp.value)}},inp,el("button",{class:"btn small",type:"submit",style:"flex:none;white-space:nowrap",text:"入る"})))}}
+function newCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const r=crypto.getRandomValues(new Uint8Array(6));return Array.from(r,x=>A[x%A.length]).join("")}
+async function makeInvite(){if(S.writeBusy)return;S.writeBusy=true;let c;do c=newCode();while(Object.values(S.profiles).some(p=>p.inviteCode===c));
+  try{await S.db.doc("profiles/"+S.me).update({inviteCode:c});S.profiles[S.me]={...S.profiles[S.me],inviteCode:c}}catch(e){writeErr(e)}S.writeBusy=false;renderFriends()}
+function inviteOwner(code){const c=String(code||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");if(!c)return null;const hit=Object.entries(S.profiles).find(([,p])=>p.inviteCode===c);return hit?hit[0]:undefined}
+async function useInvite(code,silent){const owner=inviteOwner(code);
+  if(owner===null)return!silent&&toast("招待コードを入れてね");if(!owner)return toast("その招待コードは見つからなかった");if(owner===S.me)return toast("自分のコードだよ");
+  if(isBlocked(owner))return toast("この人とはつながれないよ");
+  try{await S.db.doc("profiles/"+S.me).update({invitedBy:owner});S.profiles[S.me]={...S.profiles[S.me],invitedBy:owner};if(!iFollow(owner))await writeFollows(addFollow(owner));toast(nick(owner)+"さんをフォローしたよ。承認されると相互フォローになるよ")}catch(e){writeErr(e)}
+  syncPostSubs();renderAll()}
+// invite owner side: people who joined with my code show at the top of requests with a badge; I approve them myself
+function autoFollowBack(){}
+function renderMine(){
+  const pr=$("#myProfile");pr.textContent="";const ps=$("#myPosts");ps.textContent="";const st=$("#myStats");st.textContent="";
+  if(S.offline||!S.me){pr.append(el("p",{class:"empty",text:"ログインするとマイページが使えるよ"}));return}
+  const me=S.profiles[S.me]||{};
+  pr.append(el("div",{class:"row-gap",style:"gap:12px"},avatar(S.me),el("div",{style:"flex:1;min-width:0"},el("b",{text:me.nick||"（名前未設定）"}),el("p",{class:"sub",text:me.bio||"ひとことはまだないよ"})),el("button",{class:"btn small ghost",onclick:openProfile,text:"編集"})),
+    handleOf(S.me)?el("p",{class:"sub",style:"margin-top:6px",text:"ID：@"+handleOf(S.me)}):"",
+    S.hasPhrase===false?el("p",{class:"autherr",style:"margin-top:6px",text:"あいことばがまだだよ。パスワードを忘れたときに必要なので決めておいてね"}):"",
+    el("div",{class:"row-gap acct",style:"gap:6px;margin-top:10px;flex-wrap:wrap"},el("button",{class:"btn small ghost",onclick:()=>showAuth("newpass"),text:"パスワード変更"}),el("button",{class:"btn small "+(S.hasPhrase===false?"yolk":"ghost"),onclick:()=>showAuth("phrase"),text:S.hasPhrase===false?"あいことばを決める":"あいことば変更"}),el("button",{class:"btn small ghost",onclick:signOut,text:"ログアウト"})));
+  const mine=(S.postsBy[S.me]||[]);const prefs=new Set(mine.map(p=>p.pref));const cities=new Set(mine.map(p=>p.city).filter(Boolean));
+  st.append(stat(mine.length,"投稿したお店"),stat(cities.size,"行った市区町村"),stat(prefs.size+"/47","行った都道府県"));
+  renderSaves();
+  if(!mine.length){ps.append(el("p",{class:"empty",text:"まだ投稿がないよ"}));return}
+  for(const p of mine){const row=el("div",{class:"item"},photoEl(p,"thumb"),el("div",{class:"txt"},el("b",{text:p.name}),el("small",{text:`${placeLabel(p)}・${p.genre}・${ago(p.createdAt)}`})));
+    const ed=el("button",{class:"btn small ghost",onclick:()=>window.startEdit(p),text:"編集"});
+    const del=el("button",{class:"btn small ghost",text:"削除"});
+    const delC=()=>el("span",{class:"confirm"},"消していい？",el("button",{class:"btn small danger",onclick:()=>{S.confirm=null;deletePost(p)},text:"削除する"}),el("button",{class:"btn small ghost",onclick:()=>{S.confirm=null;renderMine()},text:"やめる"}));
+    del.onclick=()=>{S.confirm="del:"+p.id;del.replaceWith(delC())};
+    row.append(S.confirm==="del:"+p.id?delC():el("div",{class:"row-gap",style:"gap:6px;flex-wrap:nowrap"},ed,del));ps.append(row)}
+}
+function renderSaves(){const box=$("#saveList");box.textContent="";
+  const list=Object.entries(S.saves).sort((a,b)=>(a[1].done-b[1].done)||b[1].at-a[1].at);
+  if(!list.length){box.append(el("p",{class:"empty",text:"友だちの投稿の「行きたい」を押すとここにたまるよ"}));return}
+  const vis=new Map(visiblePosts().map(p=>[pkey(p),p]));
+  for(const[id,sv0]of list){const p=vis.get(sv0.author+"_"+sv0.pid);
+    const row=el("div",{class:"item"+(sv0.done?" done":"")},p?photoEl(p,"thumb"):el("div",{class:"ph thumb",style:`background:${(GMAP[sv0.genre]||GENRES[7])[2]}`,"aria-hidden":"true",text:(GMAP[sv0.genre]||GENRES[7])[1]}),
+      el("div",{class:"txt"},el("b",{text:sv0.name}),el("small",{text:`${placeLabel(sv0)}・${p?nick(sv0.author)+"のおすすめ":"もう見られない投稿"}`})),
+      el("label",{class:"chk"},el("input",{type:"checkbox",checked:!!sv0.done,onchange:async e=>{try{await S.db.doc(`data/users/${S.me}/${id}`).update({done:e.target.checked})}catch(er){writeErr(er)}}}),"行った"),
+      sv0.done?el("button",{class:"btn small yolk",onclick:()=>window.prefillPost(p||{name:sv0.name,pref:sv0.pref,city:sv0.city}),text:"投稿する"}):
+      el("button",{class:"btn small ghost",onclick:async()=>{try{await S.db.doc(`data/users/${S.me}/${id}`).delete()}catch(e){writeErr(e)}},text:"外す"}));
+    box.append(row)}}
+// ---------- notifications ----------
+function notifs(){if(!S.me||S.offline)return[];const out=[];const since=id=>(S.follows[id]?.since||{})[S.me]||0;
+  for(const id of requestIds())out.push({t:since(id),txt:S.profiles[id]?.invitedBy===S.me?`${nick(id)}さんがあなたの招待で入ったよ。承認すると相互フォロー`:`${nick(id)}さんにフォローされたよ。承認すると相互フォロー`,who:id,go:"friends"});
+  for(const id of mutualIds()){const t=since(id);if(t&&t>((myF().since||{})[id]||0))out.push({t,txt:`${nick(id)}さんがフォローを返してくれた！相互フォローになったよ`,who:id,go:"friends"})}
+  for(const[id,p]of Object.entries(S.profiles))if(p.invitedBy===S.me&&id!==S.me){if(!iFollow(id))continue;out.push({t:p.joinedAt||0,txt:`${nick(id)}さんがあなたの招待で入ったよ`,who:id,go:"friends"})};
+  const mutual=new Set(mutualIds());
+  for(const p of visiblePosts())if(p.author!==S.me&&mutual.has(p.author))out.push({t:p.createdAt,txt:`${nick(p.author)}さんが「${p.name}」を投稿したよ`,who:p.author,post:p});
+  const mine=new Map((S.postsBy[S.me]||[]).map(p=>[p.id,p]));
+  for(const id of mutual)for(const r of (S.reacts[id]||[]))if(r.to===S.me&&mine.has(r.pid)){const p=mine.get(r.pid);
+    out.push({t:r.at,txt:r.kind==="like"?`${nick(id)}さんが「${p.name}」をおいしそうって`:`${nick(id)}さんが「${p.name}」にコメント：${r.text}`,who:id,post:p,cmt:r.kind==="c"})}
+  const vis=new Map(visiblePosts().map(p=>[pkey(p),p]));
+  for(const id of mutual)for(const r of (S.reacts[id]||[]))if(r.kind==="c"&&r.reTo===S.me&&r.to!==S.me){const p=vis.get(r.to+"_"+r.pid);if(p)out.push({t:r.at,txt:`${nick(id)}さんがあなたのコメントに返信：${r.text}`,who:id,post:p,cmt:true})}
+  return out.filter(n=>n.t).sort((a,b)=>b.t-a.t).slice(0,60)}
+function renderBell(){const b=$("#bellBtn");b.hidden=!S.me||S.offline;if(b.hidden)return;
+  const n=S.gotState?notifs().filter(x=>x.t>S.notifSeen).length:0;const c=$("#bellN");c.hidden=!n;c.textContent=n>99?"99+":String(n);b.setAttribute("aria-label",n?`お知らせ ${n}件`:"お知らせ")}
+$("#bellBtn").onclick=async()=>{const m=$("#modal");m.textContent="";const seen=S.notifSeen;const list=notifs();
+  const box=el("div",{});if(!list.length)box.append(el("p",{class:"empty",text:"まだお知らせはないよ"}));
+  for(const n of list)box.append(el("button",{type:"button",class:"notif"+(n.t>seen?" new":""),onclick:()=>{m.hidden=true;if(n.cmt)openComments(n.post);else if(n.post){go("feed");openViewer(0,n.post.id)}else go(n.go)}},
+    avatar(n.who),el("div",{class:"txt"},n.txt,el("small",{text:ago(n.t)}))));
+  m.append(el("div",{class:"card pad sheet"},el("h2",{style:"font-size:18px;margin-bottom:6px",text:"お知らせ"}),box,el("button",{type:"button",class:"btn ghost",style:"margin-top:10px;width:100%",onclick:()=>m.hidden=true,text:"閉じる"})));m.hidden=false;
+  const now=Date.now();S.notifSeen=now;renderBell();try{await S.db.doc(`data/users/${S.me}/state`).set({notifSeen:now})}catch(e){}};
+function renderMe(){const b=$("#meBox");b.textContent="";if(S.me&&S.profiles[S.me]){b.append(el("span",{text:S.profiles[S.me].nick}),avatar(S.me))}else if(S.sample){b.append(el("span",{class:"sample-flag",text:"サンプル"}))}}
+function renderAll(){S.postsVer=(S.postsVer||0)+1;renderMe();renderBell();renderFeed();renderMap();renderFriends();renderMine();renderComments();renderViewer(false)}
+function go(v){const changed=S.view!==v;S.view=v;document.querySelectorAll("section[data-view]").forEach(s=>{s.hidden=s.dataset.view!==v;if(!s.hidden&&changed){s.classList.remove("enter");void s.offsetWidth;s.classList.add("enter")}});document.querySelectorAll(".tabs button").forEach(b=>{if(b.dataset.tab===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});window.scrollTo(0,0);if(v==="map")renderMap()}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{if(b.dataset.tab==="post"&&!S.me){toast(S.offline?"ログインすると投稿できるよ":"読み込み中だよ、ちょっと待ってね");return}if(b.dataset.tab==="post"&&window.newPost)window.newPost();go(b.dataset.tab)});
+$("#fSearch").addEventListener("input",renderFriends);
+$("#zoomOut").onclick=()=>{S.mapPref=null;S.mapCity=null;setVB($("#bigMap"),FULL);renderMap()};
+
+// ---------- writes ----------
+function writeErr(e){if(e&&(e.code==="42501"||e.code==="invalid_argument"))toast("この操作はできないみたい（権限がないか、ブロックされているかも）");else if(e&&e.code==="quota_exceeded")toast("保存できる量がいっぱいになったみたい");else toast("うまく保存できなかった。もう一度ためしてね")}
+function addFollow(id,base){const b=base||{};const ids=b.ids||myF().ids||[];const since=b.since||myF().since||{};const dec=b.declined||myF().declined||[];
+  return {ids:ids.includes(id)?ids:[...ids,id],since:{...since,[id]:Date.now()},declined:dec.filter(x=>x!==id)}}
+async function writeFollows(patch){const cur=myF();const data={ids:cur.ids||[],since:cur.since||{},blocked:cur.blocked||[],declined:cur.declined||[],invAccepted:cur.invAccepted||[],...patch,updatedAt:Date.now()};
+  await S.db.doc("follows/"+S.me).set(data);S.follows[S.me]=data}
+async function toggleFollow(id){if(S.writeBusy)return;S.writeBusy=true;renderFriends();
+  try{if(iFollow(id)){const since={...(myF().since||{})};delete since[id];await writeFollows({ids:(myF().ids||[]).filter(x=>x!==id),since})}
+    else{await writeFollows(addFollow(id));if(followsMe(id))toast(nick(id)+"さんと相互フォローになった！")}}catch(e){writeErr(e)}
+  S.writeBusy=false;syncPostSubs();renderAll()}
+async function setRel(id,kind){if(S.writeBusy)return;S.writeBusy=true;const f=myF();
+  try{if(kind==="block"){const since={...(f.since||{})};delete since[id];await writeFollows({ids:(f.ids||[]).filter(x=>x!==id),since,blocked:[...new Set([...(f.blocked||[]),id])]});toast(nick(id)+"さんをブロックしたよ")}
+    else if(kind==="unblock"){await writeFollows({blocked:(f.blocked||[]).filter(x=>x!==id)});toast("ブロックを解除したよ")}
+    else if(kind==="decline"){await writeFollows({declined:[...new Set([...(f.declined||[]),id])]})}}catch(e){writeErr(e)}
+  S.writeBusy=false;syncPostSubs();renderAll()}
+async function deletePost(p){try{await S.db.doc(`posts/${S.me}/items/${p.id}`).delete();for(let i=1;i<=Math.min(3,p.pics|0);i++)await S.db.doc(`posts/${S.me}/pics/${p.id}_${i}`).delete().catch(()=>{});toast("削除したよ")}catch(e){writeErr(e)}renderMine()}
+// names/<hex of lowercased name> = {owner}. One name per person, first come first served.
+function nameKey(n){return "n"+Array.from(new TextEncoder().encode(n.normalize("NFKC").toLowerCase().replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)))).map(b=>b.toString(16).padStart(2,"0")).join("")}
+async function claimName(n,oldNick){
+  if(oldNick&&nameKey(oldNick)===nameKey(n))return true;
+  const ref=S.db.doc("names/"+nameKey(n));
+  const lease=await ref.acquire({holder:S.me,ttlMs:5000});if(!lease.acquired)return false;
+  const cur=await ref.get();const owner=cur.exists&&cur.data().owner;
+  if(owner&&owner!==S.me)return false;
+  // also refuse names an older profile already shows (from before names were tracked)
+  for(const[id,p]of Object.entries(S.profiles))if(id!==S.me&&p.nick&&nameKey(p.nick)===nameKey(n))return false;
+  await ref.set({owner:S.me,at:Date.now()});
+  if(oldNick){const o=S.db.doc("names/"+nameKey(oldNick));try{const g=await o.get();if(g.exists&&g.data().owner===S.me)await o.delete()}catch(e){}}
+  return true}
+function openProfile(){
+  const me=S.profiles[S.me]||{};const m=$("#modal");m.textContent="";
+  const nickIn=el("input",{type:"text",id:"profNick",maxlength:"20",value:me.nick||S.defaultName||""});
+  const bioIn=el("input",{type:"text",id:"profBio",maxlength:"60",value:me.bio||"",placeholder:"例：ラーメンと喫茶が好き"});
+  let icon=iconOf(S.me);const iconBox=el("span",{});const drawIcon=()=>{iconBox.textContent="";iconBox.append(avatar(S.me,true,icon))};drawIcon();
+  const iconIn=el("input",{type:"file",id:"profIcon",accept:"image/*",hidden:true});
+  iconIn.onchange=async()=>{const f=iconIn.files[0];if(!f)return;try{icon=await shrinkIcon(f);drawIcon();rmBtn.hidden=false}catch(e){toast("この画像は読み込めなかった")}};
+  const rmBtn=el("button",{type:"button",class:"btn small ghost",hidden:!icon,onclick:()=>{icon=null;iconIn.value="";drawIcon();rmBtn.hidden=true},text:"元にもどす"});
+  const iconRow=el("div",{class:"icon-pick"},iconBox,el("label",{class:"btn small",for:"profIcon",text:"アイコン画像をえらぶ",style:"cursor:pointer"}),rmBtn,iconIn);
+  const err=el("p",{class:"err",hidden:true});
+  const invIn=me.nick?null:el("input",{type:"text",maxlength:"8",placeholder:"例：K7QH2M",autocomplete:"off",style:"text-transform:uppercase"});
+  const f=el("form",{class:"card pad"},el("h2",{text:me.nick?"プロフィール編集":"ようこそ腹ぱんぐらむへ"}),me.nick?null:el("p",{class:"sub",text:"友だちに表示される名前を決めてね"}),
+    iconRow,el("label",{class:"f"},"名前",el("small",{text:"ほかの人と同じでもOK"}),nickIn),handleOf(S.me)?el("p",{class:"sub",text:"ID：@"+handleOf(S.me)+"（変更できないよ）"}):null,el("label",{class:"f"},"ひとこと",el("small",{text:"なくてもOK"}),bioIn),invIn?el("label",{class:"f"},"招待コード",el("small",{text:"友だちからもらった人だけ"}),invIn):null,err,
+    el("div",{class:"row-gap"},el("button",{class:"btn yolk",type:"submit",text:"保存"}),me.nick?el("button",{class:"btn ghost",type:"button",onclick:()=>m.hidden=true,text:"やめる"}):null));
+  f.onsubmit=async ev=>{ev.preventDefault();const n=nickIn.value.trim().normalize("NFKC");const fail=t=>{err.textContent=t;err.hidden=false};err.hidden=true;
+    if(!n)return fail("名前を入れてね");
+    try{
+      const data={...me,nick:n,bio:bioIn.value.trim(),icon:icon||null,joinedAt:me.joinedAt||Date.now()};await S.db.doc("profiles/"+S.me).set(data);S.profiles[S.me]=data;m.hidden=true;
+      if(invIn&&invIn.value.trim())await useInvite(invIn.value);else{renderAll();toast("保存したよ")}}catch(e){writeErr(e)}};
+  m.append(f);m.hidden=false;setTimeout(()=>nickIn.focus(),50)}
+
+// ---------- post form ----------
+(function initForm(){
+  const gWrap=$("#pGenre");GENRES.forEach(([g],i)=>gWrap.append(el("label",{},el("input",{type:"radio",name:"genre",value:g,id:"g"+i,checked:i===0}),el("span",{text:g}))));
+  const sel=$("#pPref");PREF_NAMES.forEach((n,i)=>sel.append(el("option",{value:String(i+1).padStart(2,"0"),text:n})));
+  const rate=$("#pRate");const drawRate=()=>{rate.textContent="";for(let i=1;i<=5;i++)rate.append(el("button",{type:"button","aria-label":`満足度${i}`,"aria-pressed":String(i<=S.form.rate),onclick:()=>{S.form.rate=i;drawRate()}},bowl(i<=S.form.rate)))};drawRate();
+  const mini=$("#miniMap");buildMap(mini);const citySel=$("#pCity");
+  const pinG=mini.querySelector(".pins");
+  const drawPin=()=>{pinG.textContent="";mini.querySelectorAll(".muni.sel").forEach(e=>e.classList.remove("sel"));if(S.form.city){const e=mini.querySelector(`[data-code="${S.form.city}"]`);if(e)e.classList.add("sel")}
+    const pos=S.form.x!=null?{x:S.form.x,y:S.form.y}:(S.form.city&&MUNI[S.form.city]?MUNI[S.form.city].c:null);if(pos){const vb=mini.viewBox.baseVal;const r=vb.width/45;pinG.append(sv("circle",{cx:pos.x,cy:pos.y,r,fill:"var(--stamp)",stroke:"var(--surface)","stroke-width":"1.5px",class:"pin"}))}};
+  const fillCities=pref=>{citySel.textContent="";citySel.append(el("option",{value:"",text:"えらんでね"}));(MUNIS_BY_PREF[pref]||[]).slice().sort((a,b)=>a.code.localeCompare(b.code)).forEach(m=>citySel.append(el("option",{value:m.code,text:m.name})))};
+  const showPref=(pref,keep)=>{if(!keep){S.form.x=S.form.y=null;S.form.city=null}
+    $("#miniWrap").hidden=!pref;$("#cityWrap").hidden=!pref;if(!pref)return;fillCities(pref);citySel.value=S.form.city||"";
+    const b=prefBox(pref);const vb=fitBox(b,1.4,.06);mini.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    mini.querySelectorAll(".muni").forEach(e=>e.classList.toggle("dim",e.dataset.pref!==pref));drawPin();updateGm()};
+  sel.onchange=()=>showPref(sel.value);
+  citySel.onchange=()=>{S.form.city=citySel.value||null;S.form.x=S.form.y=null;drawPin();updateGm()};
+  const setPoint=(x,y)=>{const m=muniAt(x,y);if(m){if(m.pref!==sel.value){sel.value=m.pref;S.form.city=m.code;showPref(m.pref,true)}S.form.city=m.code;citySel.value=m.code}S.form.x=+x.toFixed(2);S.form.y=+y.toFixed(2);drawPin();updateGm();return m};
+  mini.addEventListener("click",ev=>{const pt=mini.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const m=mini.getScreenCTM();if(!m)return;const q=pt.matrixTransform(m.inverse());setPoint(q.x,q.y)});
+  const gmIn=$("#pGmap"),gmA=$("#gmSearch"),gmHint=$("#gmHint");
+  function updateGm(){const n=$("#pName").value.trim();const place=sel.value?(PREF_NAMES[+sel.value-1]+(S.form.city?" "+cityName(S.form.city):"")):"";gmA.href=n?gmapSearchUrl(n,place):"https://www.google.com/maps";$("#tbSearch").href=n?tabelogSearchUrl(n,place):"https://tabelog.com/";}
+  const suggBox=$("#pSugg"),addrIn=$("#pAddr"),addrHint=$("#addrHint");
+  function shopCandidates(q){const nq=normName(q);if(nq.length<1)return[];const seen=new Map();
+    for(const p of visiblePosts()){const n=normName(p.name);if(!n.includes(nq))continue;const key=n+"|"+(p.city||p.pref);if(!seen.has(key))seen.set(key,{p,count:0,starts:n.startsWith(nq)});seen.get(key).count++}
+    return[...seen.values()].sort((a,b)=>(b.starts-a.starts)||(b.count-a.count)).slice(0,5)}
+  function renderSugg(){const list=shopCandidates($("#pName").value.trim());suggBox.textContent="";if(!list.length){suggBox.hidden=true;return}
+    suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
+    for(const{p,count}of list)suggBox.append(el("button",{type:"button",onclick:()=>useShop(p)},photoEl(p,"thumb"),el("span",{},el("b",{text:p.name}),el("small",{text:placeLabel(p)+(count>1?`・${count}人が投稿`:"")}))));
+    suggBox.hidden=false}
+  function useShop(p){$("#pName").value=p.name;sel.value=p.pref;S.form.city=p.city||null;S.form.x=p.x??null;S.form.y=p.y??null;showPref(p.pref,true);
+    if(p.addr){addrIn.value=p.addr}if(p.gmap&&safeGmap(p.gmap)){gmIn.value=p.gmap}suggBox.hidden=true;updateGm();
+    addrHint.hidden=false;addrHint.className="hint ok";addrHint.textContent="場所を入れたよ："+placeLabel(p)}
+  $("#pName").addEventListener("input",()=>{updateGm();renderSugg()});
+  window.prefillPost=p=>{resetForm();go("post");useShop(p);$("#pName").scrollIntoView({block:"center"})};
+  $("#pName").addEventListener("blur",()=>setTimeout(()=>{if(!suggBox.contains(document.activeElement))suggBox.hidden=true},150));
+  $("#pName").addEventListener("focus",renderSugg);
+  addrIn.addEventListener("input",()=>{const r=parseAddress(addrIn.value);addrHint.hidden=!addrIn.value.trim();addrHint.className="hint";
+    if(!r){addrHint.textContent="市区町村が見つからなかった。都道府県から入れてみてね";return}
+    sel.value=r.pref;S.form.city=r.city;S.form.x=S.form.y=null;showPref(r.pref,true);updateGm();
+    addrHint.className="hint ok";addrHint.textContent=r.city?"場所を入れたよ："+PREF_NAMES[+r.pref-1]+" "+cityName(r.city):"都道府県だけわかったよ："+PREF_NAMES[+r.pref-1]});
+  gmIn.addEventListener("input",()=>{const v=gmIn.value.trim();gmHint.classList.remove("ok");
+    if(!v){gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";return}
+    const u=safeGmap(v);if(!u){gmHint.textContent="GoogleマップのURLを貼ってね（https://〜）";return}
+    const c=gmapCoords(u);if(!c){gmHint.textContent="リンクは保存するよ。短いリンクだと場所は読み取れないから、下の地図でタップしてね";return}
+    const p=project(c.lat,c.lon);const m=muniAt(p.x,p.y);
+    if(!m){gmHint.textContent="場所が日本の地図の外みたい。都道府県と地図で場所をえらんでね";return}
+    sel.value=m.pref;S.form.city=m.code;showPref(m.pref,true);setPoint(p.x,p.y);gmHint.textContent="場所を読み取ったよ："+PREF_NAMES[+m.pref-1]+" "+m.name;gmHint.classList.add("ok")});
+  $("#pPhoto").onchange=async ev=>{const fs=[...ev.target.files];ev.target.value="";if(!fs.length)return;const room=3-S.form.photos.length;if(fs.length>room)toast("写真は3枚までだよ");
+    const was=S.form.photos.length;
+    for(const f of fs.slice(0,Math.max(0,room))){try{S.form.photos.push({img:await fileImg(f),z:1,cx:.5,cy:.5})}catch(e){toast("読み込めない写真があった")}}
+    if(S.form.photos.length>was)S.form.sel=was;setPhotoView()};
+  // crop editor: drag to move, slider / pinch / wheel to zoom
+  {const fr=$("#cframe"),zr=$("#czoom");const pts=new Map();let pinch=null;
+    const cur=()=>S.form.photos[S.form.sel];
+    fr.addEventListener("pointerdown",e=>{if(!cur())return;fr.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===2){const[a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z:cur().z}}});
+    fr.addEventListener("pointermove",e=>{const it=cur();const pt=pts.get(e.pointerId);if(!it||!pt)return;
+      if(pts.size===2&&pinch){pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const[a,b]=[...pts.values()];it.z=Math.min(3,Math.max(1,pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d));zr.value=it.z;drawCrop();return}
+      const g=fitCrop(it,fr.clientWidth,fr.clientHeight);it.cx-=(e.clientX-pt.x)/g.w;it.cy-=(e.clientY-pt.y)/g.h;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});drawCrop()});
+    const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null};fr.addEventListener("pointerup",up);fr.addEventListener("pointercancel",up);
+    fr.addEventListener("wheel",e=>{const it=cur();if(!it)return;e.preventDefault();it.z=Math.min(3,Math.max(1,it.z*(e.deltaY<0?1.06:1/1.06)));zr.value=it.z;drawCrop()},{passive:false});
+    zr.addEventListener("input",()=>{const it=cur();if(!it)return;it.z=+zr.value;drawCrop()});
+    window.addEventListener("resize",()=>{if(!$("#cropper").hidden)drawCrop()})}
+  function drawCrop(){const it=S.form.photos[S.form.sel];const fr=$("#cframe"),im=$("#cimg");if(!it)return;const r=formRatio();fr.style.aspectRatio=r;
+    const fw=fr.clientWidth||320,fh=fw/r;if(im.src!==it.img.src)im.src=it.img.src;const g=fitCrop(it,fw,fh);
+    im.style.width=g.w+"px";im.style.height=g.h+"px";im.style.left=g.x+"px";im.style.top=g.y+"px";
+    const t=$("#photoGrid").children[S.form.sel];if(t){const ti=t.querySelector("img");ti.style.objectPosition=`${it.cx*100}% ${it.cy*100}%`}}
+  $("#postForm").onsubmit=async ev=>{ev.preventDefault();const err=$("#pErr");err.hidden=true;
+    const name=$("#pName").value.trim(),pref=sel.value;
+    if(!name||!pref){err.textContent=!name?"お店の名前を入れてね":"都道府県をえらんでね";err.hidden=false;return}
+    if(!S.db||!S.me){err.textContent="ログインすると投稿できるよ";err.hidden=false;return}
+    const editing=S.form.editId;const pid=editing||Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    const gm=safeGmap($("#pGmap").value||"");if($("#pGmap").value.trim()&&!gm){err.textContent="GoogleマップのURLがおかしいみたい。消すか貼りなおしてね";err.hidden=false;return}
+    const data={name,pref,city:S.form.city||null,addr:$("#pAddr").value.trim()||null,gmap:gm,genre:(document.querySelector('input[name=genre]:checked')||{}).value||"その他",rate:S.form.rate,price:$("#pPrice").value,comment:$("#pComment").value.trim(),photo:null,more:null,x:S.form.x,y:S.form.y,createdAt:editing?S.form.createdAt:Date.now()};if(editing)data.updatedAt=Date.now();
+    const btn=$("#pSubmit");btn.disabled=true;btn.textContent=editing?"更新中…":"投稿中…";
+    // bake each crop into a JPEG: the cover rides in the post doc, photos 2-4 get their own docs (each under the 256KB limit)
+    const items=S.form.photos;const r=formRatio();let cover=null,extras=[];
+    try{if(items.length){cover=encodeCrop(items[0],r,135000);extras=items.slice(1).map(it=>encodeCrop(it,r,135000))}}catch(e){err.textContent="写真をうまく保存できなかった。別の写真でためしてね";err.hidden=false;btn.disabled=false;btn.textContent=editing?"更新する":"投稿する";return}
+    data.photo=cover;data.ar=items.length?+r.toFixed(4):null;data.pics=extras.length;data.picsAt=Date.now();
+    try{for(let i=0;i<extras.length;i++)await S.db.doc(`posts/${S.me}/pics/${pid}_${i+1}`).set({d:extras[i],at:data.picsAt});
+      for(let i=extras.length+1;i<=(S.form.oldPics||0);i++)await S.db.doc(`posts/${S.me}/pics/${pid}_${i}`).delete().catch(()=>{});
+      await S.db.doc(`posts/${S.me}/items/${pid}`).set(data);toast(editing?"更新したよ！":"投稿したよ！");resetForm();S.sample=false;go(editing?"mine":"feed")}catch(e){writeErr(e)}
+    btn.disabled=false;btn.textContent=S.form.editId?"更新する":"投稿する"};
+  $("#pCancel").onclick=()=>{resetForm();go("mine")};
+  function setPhotoView(){const g=$("#photoGrid");g.textContent="";const ph=S.form.photos;if(S.form.sel==null||S.form.sel>=ph.length)S.form.sel=ph.length?0:null;
+    ph.forEach((it,i)=>g.append(el("div",{class:i===S.form.sel?"on":""},el("img",{src:it.img.src,alt:`写真${i+1}${i===0?"（表紙）":""}`,role:"button",tabindex:"0","aria-pressed":i===S.form.sel?"true":"false",style:`object-position:${it.cx*100}% ${it.cy*100}%`,onclick:()=>{S.form.sel=i;setPhotoView()},onkeydown:e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();S.form.sel=i;setPhotoView()}}}),
+      el("button",{type:"button","aria-label":`写真${i+1}を消す`,onclick:()=>{ph.splice(i,1);if(S.form.sel>=i&&S.form.sel>0)S.form.sel--;setPhotoView()},text:"×"}))));
+    const ar=$("#arRow");ar.hidden=!ph.length;ar.textContent="";
+    for(const[k,l]of [["1:1","正方形 1:1"],["4:5","縦長 4:5"],["16:9","横長 16:9"],["orig","元の比率"]])ar.append(el("button",{type:"button","aria-pressed":S.form.ar===k?"true":"false",onclick:()=>{S.form.ar=k;setPhotoView()},text:l}));
+    const po=$("#porder");po.textContent="";po.hidden=ph.length<2;
+    if(ph.length>1){const i=S.form.sel;const mv=d=>{const j=i+d;if(j<0||j>=ph.length)return;[ph[i],ph[j]]=[ph[j],ph[i]];S.form.sel=j;setPhotoView()};
+      po.append(el("button",{type:"button",class:"btn small ghost",disabled:i===0,onclick:()=>mv(-1),text:"← 前へ"}),
+        el("button",{type:"button",class:"btn small ghost",disabled:i===0,onclick:()=>{ph.unshift(ph.splice(i,1)[0]);S.form.sel=0;setPhotoView()},text:"表紙にする"}),
+        el("button",{type:"button",class:"btn small ghost",disabled:i===ph.length-1,onclick:()=>mv(1),text:"後ろへ →"}))}
+    $("#cropper").hidden=!ph.length;if(ph.length){$("#czoom").value=ph[S.form.sel].z;$("#cframe").setAttribute("aria-label",`写真${S.form.sel+1}の位置（ドラッグで動かす）`);requestAnimationFrame(drawCrop)}
+    const z=$("#dropZone");z.hidden=ph.length>=3;z.textContent="";z.append(el("span",{text:ph.length?`写真を追加（あと${3-ph.length}枚）`:"タップして写真をえらぶ（3枚まで）"}))}
+  function setMode(edit){$("#postTitle").textContent=edit?"投稿を編集":"お店を投稿";$("#pSubmit").textContent=edit?"更新する":"投稿する";$("#pCancel").hidden=!edit}
+  window.startEdit=p=>{resetForm();const arK=Object.keys(ARS).find(k=>ARS[k]&&Math.abs(ARS[k]-(+p.ar||0))<.01)||(p.ar?"orig":"1:1");
+    S.form={rate:p.rate||3,photos:[],ar:arK,sel:null,oldPics:p.pics|0,x:p.x??null,y:p.y??null,city:p.city||null,editId:p.id,createdAt:p.createdAt||Date.now()};
+    $("#pName").value=p.name||"";$("#pAddr").value=p.addr||"";$("#pGmap").value=p.gmap||"";$("#pPrice").value=p.price||"";$("#pComment").value=p.comment||"";
+    const g=document.querySelector(`input[name=genre][value="${CSS.escape(p.genre||"その他")}"]`);if(g)g.checked=true;
+    sel.value=p.pref||"";if(p.pref)showPref(p.pref,true);drawRate();setPhotoView();updateGm();setMode(true);go("post");
+    // load the saved photos back in so they can be re-framed
+    const id=p.id;(async()=>{const srcs=p.pics?[p.photo,...await getPics(p)]:photosOf(p);const its=[];for(const u of srcs){if(!okImg(u))continue;try{its.push({img:await loadImg(u),z:1,cx:.5,cy:.5})}catch(e){}}
+      if(S.form.editId===id&&!S.form.photos.length){S.form.photos=its;setPhotoView()}})()};
+  window.newPost=()=>{if(S.form.editId)resetForm()};
+  function resetForm(){$("#postForm").reset();S.form={rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null};drawRate();$("#miniWrap").hidden=true;$("#cityWrap").hidden=true;gmHint.classList.remove("ok");gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";addrHint.hidden=true;suggBox.hidden=true;setPhotoView();setMode(false);const g0=$("#g0");if(g0)g0.checked=true}
+})();
+// ---------- photo framing ----------
+const ARS={"1:1":1,"4:5":.8,"16:9":16/9,"orig":null};
+function formRatio(){const r=ARS[S.form.ar];if(r)return r;const it=S.form.photos[0];if(!it)return 1;return Math.min(1.91,Math.max(.8,it.img.naturalWidth/it.img.naturalHeight))}
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();if(/^https?:/.test(src))i.crossOrigin="anonymous";i.onload=()=>res(i);i.onerror=rej;i.src=src})}
+// keep a moderate copy (long side <= 2000px) so phones don't hold huge originals while framing
+async function fileImg(f){const u=URL.createObjectURL(f);try{const i=await loadImg(u);const k=Math.min(1,2000/Math.max(i.naturalWidth,i.naturalHeight));
+  const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);return await loadImg(c.toDataURL("image/jpeg",.92))}finally{URL.revokeObjectURL(u)}}
+// cover the frame, then clamp the center so no empty edge shows
+function fitCrop(it,fw,fh){const iw=it.img.naturalWidth,ih=it.img.naturalHeight;const s=Math.max(fw/iw,fh/ih)*it.z;const w=iw*s,h=ih*s;
+  const hx=fw/2/w,hy=fh/2/h;it.cx=Math.min(1-hx,Math.max(hx,it.cx));it.cy=Math.min(1-hy,Math.max(hy,it.cy));return{w,h,x:fw/2-it.cx*w,y:fh/2-it.cy*h}}
+function encodeCrop(it,r,target){let W=r>=1?1080:Math.round(1350*r),H=Math.round(W/r),q=.86,out="";
+  for(let i=0;i<10;i++){const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fffcf5";x.fillRect(0,0,W,H);const g=fitCrop(it,W,H);x.drawImage(it.img,g.x,g.y,g.w,g.h);
+    out=c.toDataURL("image/jpeg",q);if(out.length<=target)return out;if(q>.64)q-=.07;else{W=Math.round(W*.85);H=Math.round(W/r)}}
+  throw new Error("too big")}
+function shrink(file,target=170000){return new Promise((res,rej)=>{const url=typeof file==="string"?file:URL.createObjectURL(file);const img=new Image();img.onload=()=>{let max=900,q=.78,out;
+  for(let i=0;i<6;i++){const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);out=c.toDataURL("image/jpeg",q);if(out.length<target)break;max*=.8;q-=.06}
+  if(typeof file!=="string")URL.revokeObjectURL(url);out.length<(typeof file==="string"?target:230000)?res(out):rej(new Error("too big"))};img.onerror=rej;img.src=url})}
+
+
+// ---------- login (Supabase Auth: email + password) ----------
+async function signOut(){if(!S.sb)return;if(!confirm("ログアウトする？"))return;await S.sb.auth.signOut();location.reload()}
+// Login is ID + password. Supabase Auth needs an email-shaped username, so the ID is stored as "<id>@harapangram.invalid"
+// (a reserved domain: nothing is ever sent there, and no real address is collected).
+const ID_DOMAIN="harapangram.invalid",ID_RE=/^[a-z0-9_]{4,20}$/;
+const idMail=id=>id+"@"+ID_DOMAIN;
+// あいことば: compared loosely (width, case, spaces) so small typing differences still match
+const normPhrase=t=>String(t||"").normalize("NFKC").toLowerCase().replace(/\s+/g," ").trim();
+function handleOf(id){return (S.profiles[id]&&S.profiles[id].handle)||""}
+function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;document.body.classList.add("authing");
+  const close=()=>{a.hidden=true;document.body.classList.remove("authing")};
+  const card=el("div",{class:"authcard"});a.append(card);
+  card.append(el("div",{class:"logo",style:"justify-content:center;font-size:26px"},"腹ぱんぐらむ"),el("p",{class:"sub",style:"text-align:center",text:"相互フォローの友だちとだけ、おいしいお店をシェア"}));
+  const msg=el("p",{class:"autherr",hidden:true,role:"alert"});
+  const say=(t,ok)=>{msg.textContent=t;msg.hidden=!t;msg.classList.toggle("ok",!!ok)};
+  if(mode==="setup"){card.append(el("p",{text:"まだサーバーの設定（config.js）が入っていないよ。README の手順で Supabase の URL と anon key を入れてね。"}),
+    el("button",{class:"btn yolk",onclick:()=>{close();S.sample=true;renderAll()},text:"サンプルを見てみる"}));return}
+  const lab=(t,inp,hint)=>el("label",{class:"f"},t,hint?el("small",{text:hint}):null,inp);
+  const nameIn=el("input",{type:"text",maxlength:"20",autocomplete:"nickname",placeholder:"例：あおい"});
+  const idIn=el("input",{type:"text",maxlength:"20",autocomplete:"username",autocapitalize:"none",spellcheck:"false",placeholder:"例：aoi_ramen"});
+  idIn.addEventListener("input",()=>{const v=idIn.value.toLowerCase().replace(/[^a-z0-9_]/g,"");if(v!==idIn.value)idIn.value=v});
+  const pass=el("input",{type:"password",autocomplete:mode==="login"?"current-password":"new-password",minlength:"8"});
+  const pass2=el("input",{type:"password",autocomplete:"new-password",minlength:"8"});
+  const phraseIn=el("input",{type:"text",maxlength:"100",autocomplete:"off",spellcheck:"false",placeholder:"例：はじめて飼った犬の名前"});
+  const curPass=el("input",{type:"password",autocomplete:"current-password"});
+  const btn=el("button",{class:"btn",type:"submit",text:{login:"ログイン",signup:"アカウントを作る",newpass:"パスワードを変更",forgot:"パスワードを変更",phrase:"あいことばを保存"}[mode]});
+  if(mode==="forgot")card.append(el("p",{class:"sub",text:"登録したときの「秘密のあいことば」が合っていれば、新しいパスワードにできるよ。5回まちがえると30分待ってね"}));
+  if(mode==="phrase")card.append(el("p",{class:"sub",text:"パスワードを忘れたとき、IDとこのあいことばで新しいパスワードにできるよ。人に知られにくい答えにしてね"}));
+  const usesId=mode==="login"||mode==="signup"||mode==="forgot",newPw=mode!=="login"&&mode!=="phrase";
+  const f=el("form",{class:"authform"},
+    mode==="signup"?lab("名前",nameIn,"友だちに表示される名前。ほかの人と同じでもOK"):null,
+    usesId?lab("ID",idIn,mode==="signup"?"ログイン用。英小文字・数字・_ で4〜20文字。あとから変えられないよ":null):null,
+    mode==="phrase"?lab("いまのパスワード",curPass):null,
+    mode==="forgot"||mode==="phrase"?lab("秘密のあいことば",phraseIn,mode==="forgot"?null:"4文字以上。全角半角・大文字小文字・空白のちがいは気にしないよ"):null,
+    mode==="phrase"?null:lab(mode==="login"?"パスワード":newPw&&mode!=="signup"?"新しいパスワード":"パスワード",pass,mode==="login"?null:"8文字以上"),
+    newPw?lab("パスワード（確認）",pass2):null,
+    mode==="signup"?lab("秘密のあいことば",phraseIn,"パスワードを忘れたときに使うよ。4文字以上で、人に知られにくい答えにしてね"):null,
+    msg,btn);card.append(f);
+  const sb=S.sb;
+  f.onsubmit=async ev=>{ev.preventDefault();say("");
+    const id=idIn.value.trim().toLowerCase();
+    if(usesId&&!ID_RE.test(id))return say("IDは英小文字・数字・_ で4〜20文字にしてね");
+    if(mode!=="phrase"&&pass.value.length<8)return say("パスワードは8文字以上にしてね");
+    if(newPw&&pass.value!==pass2.value)return say("確認のパスワードが一致しないよ");
+    const phrase=normPhrase(phraseIn.value);
+    if((mode==="signup"||mode==="phrase")&&[...phrase].length<4)return say("あいことばは4文字以上にしてね");
+    if(mode==="forgot"&&!phrase)return say("あいことばを入れてね");
+    const name=nameIn.value.trim().normalize("NFKC");
+    if(mode==="signup"&&!name)return say("名前を入れてね");
+    btn.disabled=true;
+    try{
+      if(mode==="login"){const {error}=await sb.auth.signInWithPassword({email:idMail(id),password:pass.value});if(error)throw error;location.reload();return}
+      if(mode==="signup"){const {data,error}=await sb.auth.signUp({email:idMail(id),password:pass.value});if(error)throw error;
+        if(!data.session)throw new Error("Email not confirmed");
+        const {error:e2}=await sb.from("profiles").upsert({id:data.session.user.id,data:{nick:name,bio:"",icon:null,joinedAt:Date.now()}},{onConflict:"id"});if(e2)throw e2;
+        await sb.rpc("set_secret_phrase",{p_password:pass.value,p_phrase:phrase});
+        location.reload();return}
+      if(mode==="forgot"){const {data,error}=await sb.rpc("reset_password_with_phrase",{p_id:id,p_phrase:phrase,p_new_password:pass.value});if(error)throw error;
+        if(data==="locked")throw new Error("locked");if(data!=="ok")throw new Error("phrase ng");
+        const {error:e3}=await sb.auth.signInWithPassword({email:idMail(id),password:pass.value});if(e3)throw e3;location.reload();return}
+      if(mode==="phrase"){const {data,error}=await sb.rpc("set_secret_phrase",{p_password:curPass.value,p_phrase:phrase});if(error)throw error;
+        if(!data)throw new Error("Invalid login credentials");S.hasPhrase=true;close();renderMine();toast("あいことばを保存したよ");return}
+      if(mode==="newpass"){const {error}=await sb.auth.updateUser({password:pass.value});if(error)throw error;close();toast("パスワードを変更したよ");return}
+    }catch(e){say(authErr(e))}btn.disabled=false};
+  const link=(t,fn)=>el("button",{class:"linkish",type:"button",onclick:fn,text:t});
+  const links=el("div",{class:"authlinks"});card.append(links);
+  if(mode==="login")links.append(link("はじめての人はこちら（アカウントを作る）",()=>showAuth("signup")),link("パスワードを忘れた（あいことばで変更）",()=>showAuth("forgot")));
+  else if(mode==="signup"||mode==="forgot")links.append(link("ログインにもどる",()=>showAuth("login")));
+  if(mode==="newpass"||mode==="phrase")links.append(link("やめる",close));
+  else links.append(link("ログインせずにサンプルを見る",()=>{close();S.sample=true;renderAll()}));
+  setTimeout(()=>(mode==="signup"?nameIn:usesId?idIn:mode==="phrase"?curPass:pass).focus(),50)}
+function authErr(e){const m=String(e&&e.message||e||"");
+  if(/Invalid login credentials/i.test(m))return"IDかパスワードがちがうみたい";
+  if(m==="phrase ng")return"IDかあいことばがちがうみたい";
+  if(m==="locked")return"まちがいが多かったので、30分たってからためしてね";
+  if(/Email not confirmed/i.test(m))return"サーバーの設定で「Confirm email」がオンのままみたい。管理者に伝えてね";
+  if(/email.*invalid|invalid.*email/i.test(m))return"このIDは使えないみたい。ほかのIDにしてね";
+  if(/already registered|already exists/i.test(m))return"このIDはもう使われているよ。ほかのIDにしてね";
+  if(/Password should be|weak/i.test(m))return"パスワードは8文字以上にしてね";
+  if(/rate limit|too many/i.test(m))return"短い時間にためしすぎたみたい。少し待ってからもう一度ためしてね";
+  if(/fetch|network/i.test(m))return"サーバーにつながらなかった。電波を確認してね";
+  return"うまくいかなかった："+m}
+// ---------- data wiring ----------
+function syncPostSubs(){if(!S.db||!S.me)return;const want=new Set([S.me,...mutualIds()].slice(0,55));
+  for(const id of Object.keys(S.postSubs))if(!want.has(id)){S.postSubs[id]();delete S.postSubs[id];delete S.postsBy[id]}
+  for(const id of want)if(!S.postSubs[id]){try{S.postSubs[id]=S.db.collection(`posts/${id}/items`).orderBy("createdAt","desc").limit(200).onSnapshot(s=>{S.postsBy[id]=s.docs.map(d=>({id:d.id,author:id,...d.data()}));renderAll()},()=>{})}catch(e){}}
+  for(const id of Object.keys(S.reactSubs))if(!want.has(id)){S.reactSubs[id]();delete S.reactSubs[id];delete S.reacts[id]}
+  for(const id of want)if(!S.reactSubs[id]){try{S.reactSubs[id]=S.db.collection(`reacts/${id}/items`).orderBy("at","desc").limit(300).onSnapshot(s=>{S.reacts[id]=s.docs.map(d=>({id:d.id,...d.data()}));renderAll()},()=>{})}catch(e){}}}
+async function boot(){
+  buildMap($("#bigMap"));$("#bigMap").addEventListener("click",onBigMapClick);
+  renderAll();
+  const cfg=window.HP_CONFIG||{};
+  if(!cfg.url||!cfg.anonKey||!window.supabase){S.offline=true;S.ready=true;renderAll();showAuth("setup");return}
+  const sb=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});S.sb=sb;
+  sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")location.reload()});
+  let session=null;try{session=(await sb.auth.getSession()).data.session}catch(e){}
+  if(!session){S.offline=true;S.ready=true;renderAll();showAuth("login");return}
+  const me=session.user.id,db=makeSbDb(sb,me),user={id:async()=>me,me:async()=>({name:""})};
+  S.db=db;S.user=user;S.me=me;
+  sb.rpc("has_secret_phrase").then(({data})=>{S.hasPhrase=data===true;if(data===false)toast("パスワードを忘れたときのために、マイページで「あいことば」を決めておいてね");renderMine()},()=>{});
+  let gotP=false,gotF=false;
+  db.collection("profiles").onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());S.profiles=m;gotP=true;
+    if(!S.ready&&gotF){S.ready=true}
+    if(gotP&&!m[S.me]&&$("#modal").hidden&&!s.metadata.fromCache)openProfile();
+    syncPostSubs();if(gotF)autoFollowBack();renderAll()},()=>{});
+  db.collection("follows").onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());S.follows=m;gotF=true;S.gotF=true;if(gotP)S.ready=true;syncPostSubs();if(gotP)autoFollowBack();renderAll()},()=>{});
+  // private per-person docs: data/users/{me}/state = {notifSeen}, data/users/{me}/s_<author>_<pid> = saved shop
+  db.collection("data/users/"+me).onSnapshot(s=>{const sv={};let seen=0;s.docs.forEach(d=>{if(d.id==="state")seen=d.data().notifSeen||0;else if(d.id.startsWith("s_"))sv[d.id]=d.data()});
+    S.saves=sv;if(!S.gotState)S.notifSeen=seen;else S.notifSeen=Math.max(S.notifSeen,seen);S.gotState=true;renderAll()},()=>{S.gotState=true});
+}
+boot();
+</script>
