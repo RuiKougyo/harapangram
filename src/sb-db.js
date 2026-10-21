@@ -24,7 +24,8 @@ function makeSbDb(sb, me){
     if(s[0]==="names")return{t:"names",id:s[1]};
     throw new Error("unknown path "+path)}
   const OWNER={posts:"author",reacts:"author",user_data:"owner"};
-  const TABLES={profiles:["profiles"],follows:["follow_edges","follow_meta"],posts:["posts"],reacts:["reacts"],user_data:["user_data"]};
+  // profiles: who you may read depends on follow edges (is_connected), so an edge change refetches them too
+  const TABLES={profiles:["profiles","follow_edges"],follows:["follow_edges","follow_meta"],posts:["posts"],reacts:["reacts"],user_data:["user_data"]};
   function keyed(q,r){if(r.t==="profiles")return q.eq("id",r.id);if(r.t==="names")return q.eq("key",r.id);return q.eq(OWNER[r.t],r.owner).eq("id",r.id)}
   const snap=docs=>({docs:docs.map(([id,d])=>({id,data:()=>d})),metadata:{fromCache:false},size:docs.length,empty:!docs.length});
   const docSnap=d=>({exists:d!=null,data:()=>d,id:null});
