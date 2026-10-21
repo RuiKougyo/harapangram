@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>プライバシーポリシー｜腹ぱんぐらむ</title>
+<link rel="icon" href="icon.svg">
+<style>
+:root{--bg:#fcf6ea;--bg2:#f5ead3;--surface:#fffcf5;--ink:#43382c;--muted:#6b5e4d;--line:#ebe0c8;--stamp:#b14a2e;--yolk:#f5c862}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",system-ui,sans-serif;font-size:15px;line-height:1.8}
+main{max-width:680px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:8px 0 4px}h2{font-size:17px;margin:28px 0 6px;padding-top:14px;border-top:1px solid var(--line)}
+p,li{margin:6px 0}ul,ol{padding-left:1.4em}
+.date{color:var(--muted);font-size:13px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:14px 0}
+a{color:var(--stamp)}a:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
+.back{display:inline-flex;align-items:center;min-height:44px;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--bg2)}
+</style>
+</head>
+<body><main>
+<a class="back" href="./">← 腹ぱんぐらむにもどる</a>
+<h1>プライバシーポリシー</h1>
+<p class="date">制定日：2026年10月21日</p>
+<div class="box"><b>かんたんに言うと</b>
+<ul>
+<li>メールアドレス・電話番号・本名・住所は集めません。</li>
+<li>投稿は、相互フォローの友だちにしか見えません（サーバー側で制限しています）。</li>
+<li>パスワードとあいことばは暗号化（ハッシュ化）して保存し、運営者にも読めません。</li>
+<li>広告や行動追跡のしくみ（Cookie による追跡など）は使いません。データを売ることもありません。</li>
+<li>退会すると、あなたのデータはすべて削除されます。</li>
+</ul></div>
+
+<h2>1. 集める情報</h2>
+<table>
+<tr><th>情報</th><th>使い道</th><th>見える人</th></tr>
+<tr><td>名前・ID・プロフィール画像</td><td>友だちに表示、ID 検索</td><td>つながっている人（ID を知っている人は検索で名前と画像だけ見られます）</td></tr>
+<tr><td>パスワード・あいことば</td><td>ログイン、パスワード再設定</td><td>だれも読めません（ハッシュ化）</td></tr>
+<tr><td>投稿（写真・お店・感想・満足度・場所）</td><td>友だちとのシェア、地図</td><td>相互フォローの友だち</td></tr>
+<tr><td>いいね・コメント</td><td>反応と通知</td><td>その投稿が見える人</td></tr>
+<tr><td>フォロー・ブロック</td><td>表示範囲の決定</td><td>フォローは相手、ブロックは本人のみ</td></tr>
+<tr><td>行きたいリスト・通知の既読</td><td>あなた専用の機能</td><td>本人のみ</td></tr>
+<tr><td>招待コード</td><td>友だちの招待</td><td>コードを受け取った人</td></tr>
+<tr><td>通報の内容</td><td>ルール違反への対応</td><td>通報した本人と運営者</td></tr>
+</table>
+<p>写真に位置情報（Exif）が入っていても、アプリで縮小・切り抜きしたときに取り除かれ、保存されません。</p>
+
+<h2>2. 端末に保存するもの</h2>
+<p>ログイン状態と、見たストーリーの記録などを、お使いのブラウザ（localStorage）に保存します。追跡用の Cookie は使いません。</p>
+
+<h2>3. 外部サービス</h2>
+<p>本サービスは次のサービスを使って動いています。これらの事業者は、サービス提供のためにアクセス記録（IP アドレス、ブラウザの種類、日時など）を一時的に保存することがあります。</p>
+<ul>
+<li><b>Supabase</b>（データベース・ログイン・写真の保存）：データは東京リージョンに保存されます。</li>
+<li><b>GitHub Pages</b>（画面の配信）</li>
+<li><b>Google Fonts</b>（文字のフォント）</li>
+<li><b>OpenStreetMap / Nominatim</b>（お店の検索ボタンを押したときだけ、入力したお店の名前を送ります）</li>
+</ul>
+
+<h2>4. 第三者への提供</h2>
+<p>法律にもとづく場合を除き、あなたの情報を本人の同意なく第三者に渡しません。</p>
+
+<h2>5. 安全のための取り組み</h2>
+<ul>
+<li>すべての通信は暗号化（HTTPS）されています。</li>
+<li>データベースは行単位のアクセス制限（RLS）で、見てよい人だけが読めるようにしています。</li>
+<li>写真は非公開の保存場所に置き、見られる人にだけ期限つきのリンクを発行します。</li>
+<li>あいことばは5回まちがえると30分間ためせなくなります。</li>
+</ul>
+
+<h2>6. 削除・訂正</h2>
+<p>名前・画像・投稿はアプリからいつでも変更・削除できます。マイページの「アカウントを削除」で、あなたのデータをすべて削除できます。サーバーのバックアップからも一定期間ののちに消えます。</p>
+
+<h2>7. 変更</h2>
+<p>このポリシーを変更するときは、アプリ内でお知らせします。</p>
+
+<h2>8. お問い合わせ</h2>
+<p><a href="https://github.com/RuiKougyo/harapangram/issues" rel="noopener">GitHub の Issues</a> から連絡してください（だれでも読めるので、個人情報は書かないでください）。</p>
+</main></body>
+</html>

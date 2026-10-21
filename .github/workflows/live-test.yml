@@ -1,0 +1,18 @@
+# 本番サイトで3人分のテスト用アカウントを作って、相互フォロー・写真投稿・見える範囲・削除を確かめます。
+# テスト用アカウントは最後に自分で削除します。Actions タブの「live-test」→「Run workflow」で動きます。
+name: live-test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: node tests/live-e2e.js

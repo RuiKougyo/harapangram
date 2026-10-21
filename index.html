@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#fcf6ea">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="腹ぱんぐらむ">
@@ -20,7 +22,7 @@
 /* Layout: phone-first app shell; glass header, one content column, floating glass tab bar.
    Look: "週末のピック" cream + ink cards (H) and "くるくるメニュー＋水ガラス" genre revolver + liquid glass (I). */
 :root{
-  --bg:#fcf6ea; --bg2:#f5ead3; --surface:#fffcf5; --ink:#43382c; --muted:#7a6c5a; --line:#ebe0c8;
+  --bg:#fcf6ea; --bg2:#f5ead3; --surface:#fffcf5; --ink:#43382c; --muted:#6b5e4d; --line:#ebe0c8;
   --noren:#5a4a3a; --yolk:#f5c862; --yolk-ink:#43382c; --stamp:#b14a2e; --ok:#3f7656;
   --glass:rgba(255,252,245,.62); --glass-line:rgba(255,255,255,.9); --glass-hi:#fff;
   --map-0:#ece3cd; --pf-1:#b5d3a9; --pf-2:#8fba84; --pf-3:#67a064; --pf-4:#477d4c; --map-v:#f6e7c4; --map-1:#f5c862; --map-2:#eba64a; --map-3:#d47a3a; --map-4:#a8483f;
@@ -66,7 +68,7 @@ h2{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.0
 .btn{border:0;border-radius:99px;padding:10px 16px;font-weight:700;background:var(--noren);color:var(--surface)}
 .btn.yolk,:root .btn.btn.yolk{background:var(--yolk);color:var(--yolk-ink)}
 .btn.ghost,:root .btn.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.small{padding:6px 14px;font-size:13px}
+.btn.small{padding:6px 14px;font-size:13px;min-height:44px}
 .btn.danger,:root .btn.btn.danger{background:var(--stamp);color:#fff}
 .btn:disabled{opacity:.5;cursor:default}
 .row-gap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -131,7 +133,7 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .sugg small{color:var(--muted);font-size:12px}
 .sugg .cap{font-size:11px;color:var(--muted);padding:6px 10px 0;font-weight:700}
 .addr{color:var(--muted);font-size:12px;margin:0}
-.hint{font-size:12px;color:var(--muted);margin:0;font-weight:400}
+.hint{font-size:12px;color:var(--muted);margin:0;font-weight:400}.hint a{color:var(--stamp)}
 .hint.ok{color:var(--ok)}
 .pin{stroke:var(--surface);pointer-events:none;vector-effect:non-scaling-stroke}
 .halo path{fill:var(--noren);stroke:var(--noren);stroke-width:3.2px;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
@@ -182,6 +184,8 @@ textarea{min-height:90px;resize:vertical}
 .choices span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-weight:500;font-size:13px;background:var(--surface)}
 .choices input:checked+span{background:var(--noren);border-color:var(--noren);color:var(--surface)}
 .choices input:focus-visible+span{outline:3px solid var(--yolk);outline-offset:2px}
+.choice{min-height:44px;border:1px solid var(--line);border-radius:99px;padding:8px 14px;font:inherit;font-weight:500;font-size:14px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice[aria-pressed=true]{background:var(--noren);border-color:var(--noren);color:var(--surface)}
 .rate{display:flex;gap:4px}
 .rate button{background:none;border:0;padding:2px}
 .rate svg{width:34px;height:34px}
@@ -195,7 +199,9 @@ textarea{min-height:90px;resize:vertical}
 .authcard{width:min(400px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(67,56,44,.12)}
 .authform{display:flex;flex-direction:column;gap:10px}.authform input{min-height:48px;border:1px solid var(--line);border-radius:14px;padding:0 14px;font:inherit;background:var(--bg);color:var(--ink)}
 .authform .btn{min-height:48px}.autherr{color:#a3402e;font-size:14px;margin:0}.autherr.ok{color:#2f6b3a}
-.authlinks{display:flex;flex-direction:column;align-items:center;gap:2px}.authlinks .linkish{min-height:44px}
+.authlinks{display:flex;flex-direction:column;align-items:center;gap:2px}
+.agree{display:flex;gap:10px;align-items:center;min-height:44px;font-size:14px}.agree input{width:22px;height:22px;flex:none}.agree a{color:var(--noren);font-weight:700}
+.invnote{background:#fff3cf;border:1px solid #f0d68a;border-radius:14px;padding:10px 12px;font-size:14px;margin:0}.authlinks .linkish{min-height:44px}
 body.authing{overflow:hidden}
 .modal{position:fixed;inset:0;z-index:50;background:rgba(67,56,44,.42);display:grid;place-items:center;padding:16px}
 .modal .card{width:100%;max-width:420px}
@@ -219,10 +225,10 @@ body.authing{overflow:hidden}
 .pickbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .pickbar a,.pickbar button{flex:none;border:0;background:var(--yolk);color:var(--yolk-ink);border-radius:99px;padding:0 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:700;font-size:13px;text-decoration:none}
 /* I: genre revolver + liquid glass */
-.ring{position:relative;height:172px;perspective:900px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px;border-radius:22px}
-.ring button{position:absolute;left:50%;top:12px;width:100px;height:136px;margin-left:-50px;border:0;border-radius:20px;font:700 46px/1 var(--f-body);color:#fffcf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 24px rgba(67,56,44,.16);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.ring{position:relative;height:146px;perspective:900px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px;border-radius:22px}
+.ring button{position:absolute;left:50%;top:8px;width:92px;height:120px;margin-left:-46px;border:0;border-radius:20px;font:700 46px/1 var(--f-body);color:#fffcf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 24px rgba(67,56,44,.16);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
 .ring button small{font-size:13px;font-weight:700;opacity:.95}
-.ring .gi{width:64px;height:64px;overflow:visible}
+.ring .gi{width:54px;height:54px;overflow:visible}
 .gi .b{fill:#fffcf5}.gi .a{fill:var(--acc)}.gi .l{fill:none;stroke:#fffcf5;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.gi .l.thin{stroke-width:2}
 .gi .b~.l.thin,.gi .a~.l.thin{stroke:var(--g)}
 .ring button.all .gi .a{fill:#eba64a}.ring button.all .gi .l{stroke:var(--ink)}
@@ -230,8 +236,8 @@ body.authing{overflow:hidden}
 .ring button.all{color:var(--yolk-ink)}
 .glassrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:-6px}
 .glassrow>button{width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-line);background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-size:20px;line-height:1;color:var(--ink)}
-.glass{padding:14px 16px;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 24px rgba(67,56,44,.1);text-align:center;min-width:0}
-.glass b{font-family:var(--f-display);font-weight:900;font-size:19px;display:block}
+.glass{padding:8px 14px;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 24px rgba(67,56,44,.1);text-align:center;min-width:0}
+.glass b{font-family:var(--f-display);font-weight:900;font-size:17px;display:block}
 .glass small{display:block;color:var(--muted);font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* social bits */
 .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
@@ -261,7 +267,7 @@ body.authing{overflow:hidden}
 @media (max-width:420px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;letter-spacing:.18em;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:6px 14px}
 .secttl{font-size:13px;font-weight:700;color:var(--muted);padding:10px 14px 0}
-.chk{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.chk{min-height:44px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
 .chk input{width:18px;height:18px;accent-color:var(--ok)}
 .item.done .txt b{text-decoration:line-through;color:var(--muted)}
 /* friends' latest posts row + post viewer */
@@ -323,7 +329,7 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
     <h2 id="tlTitle" style="font-size:18px;scroll-margin-top:72px">タイムライン</h2>
     <div class="filters" id="filters" hidden>
       <input type="text" id="fq" placeholder="店名・地域・ひとことでさがす" aria-label="店名・地域・ひとことでさがす" autocomplete="off">
-      <select id="fsort" aria-label="並べ替え"><option value="new">新しい順</option><option value="rate">満足度が高い順</option><option value="cheap">安い順</option></select>
+      <select id="fsort" aria-label="並べ替え"><option value="new">新しい順</option><option value="rate">満足度が高い順</option><option value="cheap">安い順</option><option value="near">近い順</option></select>
       <select id="fprice" aria-label="値段でしぼる"><option value="">値段すべて</option><option>〜¥1,000</option><option>¥1,000〜3,000</option><option>¥3,000〜6,000</option><option>¥6,000〜</option></select>
     </div>
     <div id="feedList" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -342,6 +348,7 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
     <div class="legend"><span>市区町村ごとの投稿数</span><i style="background:var(--map-0)"></i>0<i style="background:var(--map-1)"></i>1<i style="background:var(--map-2)"></i>2〜3<i style="background:var(--map-3)"></i>4〜6<i style="background:var(--map-4)"></i>7〜</div>
     <div id="prefList"></div>
     <h2 style="font-size:17px">制覇ランキング</h2>
+    <div class="arrow" id="rankSpan" role="group" aria-label="ランキングの期間"><button type="button" data-span="month" aria-pressed="false">今月</button><button type="button" data-span="year" aria-pressed="false">今年</button><button type="button" data-span="all" aria-pressed="true">すべて</button></div>
     <div class="card" id="rankList"></div>
     <p class="hint">地図の形：<a href="https://www.npmjs.com/package/jpn-atlas" target="_blank" rel="noopener">jpn-atlas</a>（BSD-3-Clause）／市区町村名：<a href="https://www.npmjs.com/package/jp-local-gov" target="_blank" rel="noopener">jp-local-gov</a>（MIT）</p>
   </section>
@@ -355,6 +362,8 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
       <p class="hint" id="addrHint" hidden></p>
       <label class="f">GoogleマップのURL <small>なくてもOK。Googleマップの「共有」でコピーしたリンクを貼ってね</small><input type="text" id="pGmap" inputmode="url" maxlength="1000" placeholder="https://www.google.com/maps/place/..."></label>
       <div class="gm-row"><a id="gmSearch" href="https://www.google.com/maps" target="_blank" rel="noopener">Googleマップで探す</a><a id="tbSearch" href="https://tabelog.com/" target="_blank" rel="noopener">食べログで探す</a><p class="hint" id="gmHint">店名を入れるとGoogleマップや食べログで検索できるよ</p></div>
+      <button type="button" class="btn small ghost" id="osmBtn">店名から場所と営業時間をさがす</button>
+      <div class="sugg osm" id="osmList" hidden></div>
       <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">ジャンル<div class="choices" id="pGenre"></div></div>
       <label class="f">都道府県<select id="pPref" required><option value="">えらんでね</option></select></label>
       <label class="f" id="cityWrap" hidden>市区町村<select id="pCity"><option value="">えらんでね</option></select></label>
@@ -364,10 +373,11 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
       </div>
       <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">満足度<div class="rate" id="pRate"></div></div>
       <label class="f">だいたいの値段<select id="pPrice"><option value="">ー</option><option>〜¥1,000</option><option>¥1,000〜3,000</option><option>¥3,000〜6,000</option><option>¥6,000〜</option></select></label>
+      <label class="f">営業時間・定休日 <small>なくてもOK</small><input type="text" id="pHours" maxlength="80" placeholder="例：11:00〜15:00、日曜休み" autocomplete="off"></label>
       <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:14px">写真 <small>3枚まで。比率をえらんで、写真をドラッグで動かしたりズームしたりできるよ</small>
         <div class="arrow" id="arRow" role="group" aria-label="写真の比率" hidden></div>
-        <div class="cropper" id="cropper" hidden><div class="cframe" id="cframe" aria-label="写真の位置（ドラッグで動かす）"><img id="cimg" alt=""></div>
-          <label class="zoomrow">ズーム<input type="range" id="czoom" min="1" max="3" step="0.01" value="1"></label>
+        <div class="cropper" id="cropper" hidden><div class="cframe" id="cframe" tabindex="0" role="application" aria-roledescription="写真の切り抜き" aria-label="写真の位置（ドラッグか矢印キーで動かす、＋−でズーム）"><img id="cimg" alt=""></div>
+          <label class="zoomrow">ズーム<input type="range" id="czoom" aria-label="写真のズーム" min="1" max="3" step="0.01" value="1"></label>
           <div class="porder" id="porder" hidden></div></div>
         <div class="pgrid" id="photoGrid"></div>
         <label class="drop" id="dropZone" for="pPhoto"><span id="dropTxt">タップして写真をえらぶ</span></label>
@@ -632,6 +642,8 @@ function renderMap(){
 }
 // ---------- conquest ranking: me + mutual friends by distinct cities ----------
 function renderRanking(posts){const box=$("#rankList");if(!box)return;box.textContent="";
+  const span=S.rankSpan||"all",now=new Date();$("#rankSpan").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.span===span)));
+  if(span!=="all"){const from=span==="month"?new Date(now.getFullYear(),now.getMonth(),1):new Date(now.getFullYear(),0,1);posts=posts.filter(p=>p.createdAt>=+from)}
   const ids=S.sample?[...new Set(posts.map(p=>p.author))]:[...(S.me?[S.me]:[]),...mutualIds()];const by={};
   for(const p of posts){const r=by[p.author]=by[p.author]||{c:new Set(),pf:new Set()};if(p.city)r.c.add(p.city);r.pf.add(p.pref)}
   const rows=ids.map(id=>({id,c:by[id]?by[id].c.size:0,pf:by[id]?by[id].pf.size:0})).sort((a,b)=>b.c-a.c||b.pf-a.pf);
@@ -645,10 +657,12 @@ function shopGroup(p){const k=shopKey(p);if(S.shopsFor!==S.postsVer){S.shopsFor=
   return S.shops.get(k)||[p]}
 function openShop(p){const list=shopGroup(p).slice().sort((a,b)=>b.createdAt-a.createdAt);const m=$("#modal");m.textContent="";
   const avg=list.reduce((a,q)=>a+(q.rate||0),0)/list.length;
-  const box=el("div",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:p.name}),el("p",{class:"sub",text:`${placeLabel(p)}・${new Set(list.map(q=>q.author)).size}人が投稿・満足度の平均 ${avg.toFixed(1)}`}));
+  const box=el("div",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:p.name}),el("p",{class:"sub",text:`${placeLabel(p)}・${new Set(list.map(q=>q.author)).size}人が投稿・満足度の平均 ${avg.toFixed(1)}`}),
+    (h=>h?el("p",{class:"sub",text:"営業時間："+h.hours}):null)(list.find(q=>q.hours)));
   for(const q of list)box.append(el("button",{type:"button",class:"item",style:"background:none;border:0;border-top:1px solid var(--line);width:100%;text-align:left;color:inherit;font:inherit",onclick:()=>{m.hidden=true;openViewer(0,q.id)}},
     avatar(q.author),el("div",{class:"txt"},el("b",{text:(q.author===S.me&&!q.sample?"自分":nick(q.author))+`・満足度${q.rate||0}`}),el("small",{text:(q.comment||"ひとことなし")+"・"+ago(q.createdAt)}))));
   box.append(el("button",{type:"button",class:"btn ghost",style:"margin-top:12px",onclick:()=>{m.hidden=true},text:"閉じる"}));m.append(box);m.hidden=false}
+$("#rankSpan").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.rankSpan=b.dataset.span;renderMap()});
 $("#mapWho").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.mapWho=b.dataset.who;renderMap()});
 function onBigMapClick(ev){const t=ev.target.closest&&ev.target.closest(".muni");if(!t)return;const pref=t.dataset.pref,code=t.dataset.code;
   if(S.mapPref!==pref){S.mapPref=pref;S.mapCity=null;zoomTo(pref)}else{S.mapCity=S.mapCity===code?null:code}renderMap()}
@@ -713,13 +727,15 @@ function postCard(p){
       el("h3",{class:"shop",text:p.name}),
       el("div",{class:"meta"},el("span",{class:"chip pref",text:placeLabel(p)}),el("span",{class:"chip",text:p.genre}),p.price?el("span",{text:p.price}):null),
       p.addr?el("p",{class:"addr",text:p.addr}):null,
+      p.hours?el("p",{class:"addr",text:"営業時間："+p.hours}):null,
       hara(p.rate||0),
       p.comment?el("p",{class:"comment",text:p.comment}):null,
       (g=>g.length>1?el("button",{type:"button",class:"shopline",onclick:()=>openShop(p)},`${new Set(g.map(q=>q.author)).size}人が投稿・平均の満足度`,el("b",{text:(g.reduce((a,q)=>a+(q.rate||0),0)/g.length).toFixed(1)}),el("span",{style:"margin-left:auto;white-space:nowrap",text:"見る ›"})):null)(shopGroup(p)),
       postActs(p),
       el("div",{class:"row-gap",style:"gap:16px"},mine?el("button",{class:"linkish",onclick:()=>{closeViewer();window.startEdit(p)},text:"編集"}):null,el("button",{class:"linkish",onclick:()=>{closeViewer();S.mapPref=p.pref;S.mapCity=p.city||null;go("map");zoomTo(p.pref,p.city);renderMap()},text:"地図で見る"}),
         el("a",{class:"gm",href:(p.gmap&&safeGmap(p.gmap))||gmapSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"Googleマップで開く"}),
-        el("a",{class:"gm",href:tabelogSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"食べログで探す"}))));
+        el("a",{class:"gm",href:tabelogSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"食べログで探す"}),
+        !mine&&!p.sample?el("button",{class:"linkish",style:"color:var(--muted)",onclick:()=>{closeViewer();openReport({target:p.author,post:p.id})},text:"通報"}):null)));
 }
 const IC={heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'};
 function ic(n,fill){const s=sv("svg",{viewBox:"0 0 24 24",fill:fill?"currentColor":"none",stroke:"currentColor","stroke-width":"2","stroke-linejoin":"round","aria-hidden":"true"});s.innerHTML=IC[n];return s}
@@ -754,7 +770,8 @@ function renderComments(){const p=S.cmtFor;const box=$("#cmtList");if(!p||!box||
   const row=(r,reply)=>el("div",{class:"cmt"+(reply?" reply":"")},avatar(r.by),el("div",{class:"txt"},el("b",{text:r.by===S.me?"自分":nick(r.by)}),
     reply&&r.reTo&&r.reTo!==r.by?el("span",{class:"at",text:"@"+(r.reTo===S.me?"自分":nick(r.reTo))+" "}):null,r.text,el("div",{},el("small",{text:ago(r.at)}),
     el("button",{class:"linkish",style:"margin-left:10px;font-size:12px",onclick:()=>{S.replyTo={re:reply?r.re:r.id,by:r.by};renderComments();const i=$("#modal input[type=text]");if(i)i.focus()},text:"返信"}),
-    r.by===S.me?el("button",{class:"linkish",style:"margin-left:6px;font-size:12px",onclick:async()=>{try{await S.db.doc(`reacts/${S.me}/items/${r.id}`).delete()}catch(e){writeErr(e)}},text:"消す"}):null)));
+    r.by===S.me?el("button",{class:"linkish",style:"margin-left:6px;font-size:12px",onclick:async()=>{try{await S.db.doc(`reacts/${S.me}/items/${r.id}`).delete()}catch(e){writeErr(e)}},text:"消す"}):
+      el("button",{class:"linkish",style:"margin-left:6px;font-size:12px;color:var(--muted)",onclick:()=>openReport({target:r.by,react:r.id}),text:"通報"}))));
   for(const r of cm.filter(isTop)){box.append(row(r,false));for(const x of cm.filter(x=>x.re===r.id))box.append(row(x,true))}
   const chip=$("#replyChip");if(chip){chip.textContent="";chip.hidden=!S.replyTo;
     if(S.replyTo)chip.append(el("span",{class:"chip",text:`↳ ${S.replyTo.by===S.me?"自分":nick(S.replyTo.by)}さんに返信`}),el("button",{type:"button",class:"linkish",style:"font-size:12px;margin-left:6px","aria-label":"返信をやめる",onclick:()=>{S.replyTo=null;renderComments()},text:"やめる"}))}}
@@ -763,10 +780,17 @@ function applyFilters(list){const q=S.q.trim().toLowerCase();let out=list;
   if(q)out=out.filter(p=>[p.name,placeLabel(p),p.addr,p.comment,p.genre,nick(p.author)].filter(Boolean).join(" ").toLowerCase().includes(q));
   if(S.price)out=out.filter(p=>p.price===S.price);
   if(S.sort==="rate")out=[...out].sort((a,b)=>(b.rate||0)-(a.rate||0)||b.createdAt-a.createdAt);
+  else if(S.sort==="near"&&S.here){const d=p=>{const q=pinPos(p);return q?Math.hypot(q.x-S.here.x,q.y-S.here.y):Infinity};out=out.map(p=>[d(p),p]).sort((a,b)=>a[0]-b[0]||b[1].createdAt-a[1].createdAt).map(x=>x[1])}
   else if(S.sort==="cheap")out=[...out].sort((a,b)=>{const ia=PRICES.indexOf(a.price),ib=PRICES.indexOf(b.price);return (ia<0?9:ia)-(ib<0?9:ib)||b.createdAt-a.createdAt});
   return out}
 $("#fq").addEventListener("input",e=>{S.q=e.target.value;renderFeed()});
-$("#fsort").addEventListener("change",e=>{S.sort=e.target.value;renderFeed()});
+$("#fsort").addEventListener("change",e=>{const v=e.target.value;
+  if(v!=="near"){S.sort=v;renderFeed();return}
+  if(!navigator.geolocation){toast("この端末では現在地が使えないよ");e.target.value=S.sort;return}
+  toast("現在地をしらべています…");
+  // the position stays in this page only: it is turned into a map point and never sent anywhere
+  navigator.geolocation.getCurrentPosition(pos=>{const q=project(pos.coords.latitude,pos.coords.longitude);S.here={x:q.x,y:q.y};S.sort="near";renderFeed()},
+    ()=>{toast("現在地が使えなかった。ブラウザの位置情報を許可してね");e.target.value=S.sort},{enableHighAccuracy:false,timeout:10000,maximumAge:600000})});
 $("#fprice").addEventListener("change",e=>{S.price=e.target.value;renderFeed()});
 function renderFeed(){S.postsVer=(S.postsVer||0)+1;
   const n=$("#feedNotice");n.textContent="";const list=$("#feedList");list.textContent="";
@@ -893,41 +917,48 @@ function renderFriends(){
     for(const id of reqs)rq.append(friendRow(id,S.profiles[id]?.invitedBy===S.me?el("span",{class:"badge inv",text:"あなたの招待で参加"}):null,el("div",{class:"row-gap",style:"gap:6px;flex-wrap:nowrap"},
       el("button",{class:"btn small yolk",disabled:S.writeBusy,onclick:()=>toggleFollow(id),text:"承認"}),
       el("button",{class:"btn small ghost",disabled:S.writeBusy,onclick:()=>setRel(id,"decline"),text:"見送る"}))))}
-  const q=$("#fSearch").value.trim().toLowerCase();
+  const q=$("#fSearch").value.trim().toLowerCase();const qid=q.replace(/^@/,"");
+  if(ID_RE.test(qid)&&S.found&&S.found.handle===qid&&S.found.id&&!S.profiles[S.found.id])S.profiles[S.found.id]=S.found.data;
   let ids=Object.keys(S.profiles).filter(id=>id!==S.me&&!reqs.includes(id)&&!iBlocked(id)&&!blockedMe(id)&&(!q||nick(id).toLowerCase().includes(q)||handleOf(id).includes(q.replace(/^@/,""))));
   const rank=id=>(iFollow(id)&&followsMe(id))?0:followsMe(id)?1:iFollow(id)?2:3;
   ids.sort((a,b)=>rank(a)-rank(b)||nick(a).localeCompare(nick(b),"ja"));
-  if(!ids.length)box.append(el("p",{class:"empty",text:q?"見つからなかった":"まだほかの人が登録してないよ。上の招待コードを友だちに送ってみよう"}));
+  if(!ids.length)box.append(el("p",{class:"empty",text:q?(ID_RE.test(qid)?(S.finding?"さがしているよ…":"その名前やIDの人は見つからなかった。IDは全部ぴったり入れてね"):"見つからなかった。知らない人はIDを全部ぴったり入れるとさがせるよ"):"まだつながっている人はいないよ。上の招待リンクを友だちに送るか、友だちのIDを入れてさがしてね"}));
   for(const id of ids){const f=iFollow(id);
     const blk=el("button",{class:"linkish",style:"font-size:12px;color:var(--muted)",text:"ブロック"});
     const blkC=()=>el("span",{class:"confirm"},"ブロックする？",el("button",{class:"btn small danger",onclick:()=>{S.confirm=null;setRel(id,"block")},text:"する"}),el("button",{class:"btn small ghost",onclick:()=>{S.confirm=null;renderFriends()},text:"やめる"}));
     blk.onclick=()=>{S.confirm="blk:"+id;blk.replaceWith(blkC())};
+    const rep_=el("button",{class:"linkish",style:"font-size:12px;color:var(--muted)",onclick:()=>openReport({target:id}),text:"通報"});
     box.append(friendRow(id,relBadge(id),el("div",{style:"display:flex;flex-direction:column;align-items:flex-end;gap:6px"},
-      el("button",{class:"btn small"+(f?" ghost":""),style:"white-space:nowrap",disabled:S.writeBusy,onclick:()=>toggleFollow(id),text:f?"フォロー解除":(followsMe(id)?"フォローを返す":"フォロー")}),S.confirm==="blk:"+id?blkC():blk)))}
+      el("button",{class:"btn small"+(f?" ghost":""),style:"white-space:nowrap",disabled:S.writeBusy,onclick:()=>toggleFollow(id),text:f?"フォロー解除":(followsMe(id)?"フォローを返す":"フォロー")}),el("div",{class:"row-gap",style:"gap:12px;justify-content:flex-end"},rep_,S.confirm==="blk:"+id?blkC():blk))))}
   const blocked=(myF().blocked||[]).filter(id=>S.profiles[id]);
   if(blocked.length){bl.hidden=false;bl.append(el("div",{class:"secttl",text:"ブロック中（お互いの投稿が見えず、フォローもできないよ）"}));
     for(const id of blocked)bl.append(friendRow(id,null,el("button",{class:"btn small ghost",disabled:S.writeBusy,onclick:()=>setRel(id,"unblock"),text:"ブロック解除"})))}
 }
-function inviteText(code){return `腹ぱんぐらむで一緒においしいお店をシェアしよう！\n${APP_URL}\n開いたら「ともだち」の招待コードに ${code} を入れてね。承認したら相互フォローになるよ`}
+function inviteLink(code){return APP_URL+"?invite="+encodeURIComponent(code)}
+function inviteText(code){return `腹ぱんぐらむで一緒においしいお店をシェアしよう！\n${inviteLink(code)}\nリンクを開いてアカウントを作ると、わたしにフォロー申請が届くよ（招待コード ${code}）`}
 function renderInvite(){const b=$("#inviteBox");b.textContent="";
   if(S.offline||!S.me){b.hidden=true;return}b.hidden=false;
   const me=S.profiles[S.me]||{};const code=me.inviteCode;
-  b.append(el("b",{text:"友だちを招待"}),el("p",{class:"sub",text:"コードで入ってくれた友だちは、フォロー申請のいちばん上に「あなたの招待で参加」と出るよ。承認すると相互フォロー"}));
-  if(code)b.append(el("div",{class:"row-gap"},el("span",{class:"code",text:code}),el("button",{class:"btn small yolk",onclick:async()=>{try{await navigator.clipboard.writeText(inviteText(code));toast("招待メッセージをコピーしたよ。LINEなどに貼ってね")}catch(e){toast("コピーできなかった。コードを直接伝えてね")}},text:"招待メッセージをコピー"})));
+  b.append(el("b",{text:"友だちを招待"}),el("p",{class:"sub",text:"招待リンクから入ってくれた友だちは、フォロー申請のいちばん上に「あなたの招待で参加」と出るよ。承認すると相互フォロー"}));
+  if(code)b.append(el("div",{class:"row-gap"},el("span",{class:"code",text:code}),el("button",{class:"btn small yolk",onclick:async()=>{try{await navigator.clipboard.writeText(inviteText(code));toast("招待メッセージをコピーしたよ。LINEなどに貼ってね")}catch(e){toast("コピーできなかった。コードを直接伝えてね")}},text:"招待メッセージをコピー"}),navigator.share?el("button",{class:"btn small ghost",onclick:()=>navigator.share({title:"腹ぱんぐらむ",text:inviteText(code)}).catch(()=>{}),text:"LINEなどで送る"}):null));
   else b.append(el("div",{},el("button",{class:"btn small yolk",disabled:S.writeBusy||!me.nick,onclick:makeInvite,text:"招待コードを作る"})));
   if(!me.invitedBy){const inp=el("input",{type:"text",maxlength:"8",placeholder:"もらった招待コード","aria-label":"もらった招待コード",autocomplete:"off",style:"text-transform:uppercase"});
     b.append(el("form",{class:"row-gap",style:"flex-direction:row;flex-wrap:nowrap;gap:8px",onsubmit:ev=>{ev.preventDefault();useInvite(inp.value)}},inp,el("button",{class:"btn small",type:"submit",style:"flex:none;white-space:nowrap",text:"入る"})))}}
 function newCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const r=crypto.getRandomValues(new Uint8Array(6));return Array.from(r,x=>A[x%A.length]).join("")}
-async function makeInvite(){if(S.writeBusy)return;S.writeBusy=true;let c;do c=newCode();while(Object.values(S.profiles).some(p=>p.inviteCode===c));
-  try{await S.db.doc("profiles/"+S.me).update({inviteCode:c});S.profiles[S.me]={...S.profiles[S.me],inviteCode:c}}catch(e){writeErr(e)}S.writeBusy=false;renderFriends()}
-function inviteOwner(code){const c=String(code||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");if(!c)return null;const hit=Object.entries(S.profiles).find(([,p])=>p.inviteCode===c);return hit?hit[0]:undefined}
-async function useInvite(code,silent){const owner=inviteOwner(code);
+async function makeInvite(){if(S.writeBusy)return;S.writeBusy=true;
+  for(let i=0;i<3;i++){const c=newCode();try{await S.db.doc("profiles/"+S.me).update({inviteCode:c});S.profiles[S.me]={...S.profiles[S.me],inviteCode:c};break}catch(e){if(i===2)writeErr(e)}}S.writeBusy=false;renderFriends()}
+async function inviteOwner(code){const c=String(code||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");if(!c)return null;
+  if(S.profiles[S.me]&&S.profiles[S.me].inviteCode===c)return S.me;
+  try{const {data,error}=await S.sb.rpc("find_by_invite",{p_code:c});if(error)throw error;const r=data&&data[0];if(!r)return undefined;if(!S.profiles[r.id])S.profiles[r.id]=r.data;return r.id}catch(e){return undefined}}
+async function useInvite(code,silent){const owner=await inviteOwner(code);
   if(owner===null)return!silent&&toast("招待コードを入れてね");if(!owner)return toast("その招待コードは見つからなかった");if(owner===S.me)return toast("自分のコードだよ");
   if(isBlocked(owner))return toast("この人とはつながれないよ");
   try{await S.db.doc("profiles/"+S.me).update({invitedBy:owner});S.profiles[S.me]={...S.profiles[S.me],invitedBy:owner};if(!iFollow(owner))await writeFollows(addFollow(owner));toast(nick(owner)+"さんをフォローしたよ。承認されると相互フォローになるよ")}catch(e){writeErr(e)}
   syncPostSubs();renderAll()}
 // invite owner side: people who joined with my code show at the top of requests with a badge; I approve them myself
-function autoFollowBack(){}
+// a pending ?invite=CODE from the link is used once, right after the first sign-in
+function autoFollowBack(){let c=null;try{c=sessionStorage.getItem("hp_invite")}catch(e){}if(!c||!S.me||!S.profiles[S.me]||S.invBusy)return;S.invBusy=true;
+  try{sessionStorage.removeItem("hp_invite")}catch(e){}if(!S.profiles[S.me].invitedBy)useInvite(c,true)}
 function renderMine(){
   const pr=$("#myProfile");pr.textContent="";const ps=$("#myPosts");ps.textContent="";const st=$("#myStats");st.textContent="";
   if(S.offline||!S.me){pr.append(el("p",{class:"empty",text:"ログインするとマイページが使えるよ"}));return}
@@ -935,7 +966,9 @@ function renderMine(){
   pr.append(el("div",{class:"row-gap",style:"gap:12px"},avatar(S.me),el("div",{style:"flex:1;min-width:0"},el("b",{text:me.nick||"（名前未設定）"}),el("p",{class:"sub",text:me.bio||"ひとことはまだないよ"})),el("button",{class:"btn small ghost",onclick:openProfile,text:"編集"})),
     handleOf(S.me)?el("p",{class:"sub",style:"margin-top:6px",text:"ID：@"+handleOf(S.me)}):"",
     S.hasPhrase===false?el("p",{class:"autherr",style:"margin-top:6px",text:"あいことばがまだだよ。パスワードを忘れたときに必要なので決めておいてね"}):"",
-    el("div",{class:"row-gap acct",style:"gap:6px;margin-top:10px;flex-wrap:wrap"},el("button",{class:"btn small ghost",onclick:()=>showAuth("newpass"),text:"パスワード変更"}),el("button",{class:"btn small "+(S.hasPhrase===false?"yolk":"ghost"),onclick:()=>showAuth("phrase"),text:S.hasPhrase===false?"あいことばを決める":"あいことば変更"}),el("button",{class:"btn small ghost",onclick:signOut,text:"ログアウト"})));
+    el("div",{class:"row-gap acct",style:"gap:6px;margin-top:10px;flex-wrap:wrap"},el("button",{class:"btn small ghost",onclick:()=>showAuth("newpass"),text:"パスワード変更"}),el("button",{class:"btn small "+(S.hasPhrase===false?"yolk":"ghost"),onclick:()=>showAuth("phrase"),text:S.hasPhrase===false?"あいことばを決める":"あいことば変更"}),el("button",{class:"btn small ghost",onclick:signOut,text:"ログアウト"})),
+    el("div",{class:"row-gap",style:"gap:16px;margin-top:6px"},el("a",{class:"linkish",href:"terms.html",target:"_blank",rel:"noopener",text:"利用規約"}),el("a",{class:"linkish",href:"privacy.html",target:"_blank",rel:"noopener",text:"プライバシーポリシー"}),
+      el("button",{class:"linkish",style:"color:#a3402e;margin-left:auto",onclick:openDeleteAccount,text:"アカウントを削除"})));
   const mine=(S.postsBy[S.me]||[]);const prefs=new Set(mine.map(p=>p.pref));const cities=new Set(mine.map(p=>p.city).filter(Boolean));
   st.append(stat(mine.length,"投稿したお店"),stat(cities.size,"行った市区町村"),stat(prefs.size+"/47","行った都道府県"));
   renderSaves();
@@ -1069,6 +1102,27 @@ function openProfile(){
     addrHint.hidden=false;addrHint.className="hint ok";addrHint.textContent="場所を入れたよ："+placeLabel(p)}
   $("#pName").addEventListener("input",()=>{updateGm();renderSugg()});
   window.prefillPost=p=>{resetForm();go("post");useShop(p);$("#pName").scrollIntoView({block:"center"})};
+  // shop lookup in OpenStreetMap (Nominatim): one request per button press, at most 1 per second, as its usage policy asks
+  const OSM_DAYS={Mo:"月",Tu:"火",We:"水",Th:"木",Fr:"金",Sa:"土",Su:"日",PH:"祝"};
+  const osmHours=t=>String(t||"").replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g,d=>OSM_DAYS[d]).replace(/\boff\b/g,"休み").replace(/\s*;\s*/g,"、").replace(/-/g,"〜").slice(0,80);
+  const osmAddr=h=>String(h.display_name||"").split(",").map(x=>x.trim()).slice(1).filter(x=>x&&x!=="日本"&&!/^\d{3}-?\d{4}$/.test(x)).reverse().join("");
+  let osmLast=0;
+  function useOsm(h,n){const lat=+h.lat,lon=+h.lon,pt=project(lat,lon),m=muniAt(pt.x,pt.y);
+    if(!$("#pName").value.trim())$("#pName").value=h.name||n;const a=osmAddr(h);if(a)addrIn.value=a;
+    if(m){sel.value=m.pref;S.form.city=m.code;showPref(m.pref,true);setPoint(pt.x,pt.y)}
+    const oh=h.extratags&&h.extratags.opening_hours;if(oh&&!$("#pHours").value.trim())$("#pHours").value=osmHours(oh);
+    $("#osmList").hidden=true;updateGm();addrHint.hidden=false;addrHint.className="hint ok";addrHint.textContent=m?"場所を入れたよ："+PREF_NAMES[+m.pref-1]+" "+m.name+(oh?"（営業時間も入れたよ）":""):"住所を入れたよ。都道府県をえらんでね"}
+  $("#osmBtn").onclick=async()=>{const n=$("#pName").value.trim(),box=$("#osmList"),btn=$("#osmBtn");if(!n){toast("先にお店の名前を入れてね");$("#pName").focus();return}
+    const wait=1100-(Date.now()-osmLast);if(wait>0)await new Promise(r=>setTimeout(r,wait));osmLast=Date.now();
+    const place=sel.value?PREF_NAMES[+sel.value-1]+(S.form.city?" "+cityName(S.form.city):""):"";
+    btn.disabled=true;btn.textContent="さがしています…";box.textContent="";
+    try{const r=await fetch("https://nominatim.openstreetmap.org/search?"+new URLSearchParams({q:(n+" "+place).trim(),format:"jsonv2",countrycodes:"jp",addressdetails:"1",extratags:"1",limit:"5","accept-language":"ja"}));
+      if(!r.ok)throw new Error(r.status);const hits=(await r.json()).filter(h=>isFinite(+h.lat)&&isFinite(+h.lon));
+      box.append(el("div",{class:"cap",text:hits.length?"地図データの候補（タップで入れる）":"見つからなかった。住所かGoogleマップのリンクで入れてね"}));
+      for(const h of hits)box.append(el("button",{type:"button",onclick:()=>useOsm(h,n)},el("span",{},el("b",{text:h.name||n}),el("small",{text:osmAddr(h)+(h.extratags&&h.extratags.opening_hours?"・営業時間あり":"")}))));
+      box.append(el("p",{class:"hint",style:"padding:6px 12px;margin:0"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"));box.hidden=false}
+    catch(e){toast("いまはさがせなかった。少し待ってためしてね")}
+    finally{btn.disabled=false;btn.textContent="店名から場所と営業時間をさがす"}};
   $("#pName").addEventListener("blur",()=>setTimeout(()=>{if(!suggBox.contains(document.activeElement))suggBox.hidden=true},150));
   $("#pName").addEventListener("focus",renderSugg);
   addrIn.addEventListener("input",()=>{const r=parseAddress(addrIn.value);addrHint.hidden=!addrIn.value.trim();addrHint.className="hint";
@@ -1095,6 +1149,10 @@ function openProfile(){
       const g=fitCrop(it,fr.clientWidth,fr.clientHeight);it.cx-=(e.clientX-pt.x)/g.w;it.cy-=(e.clientY-pt.y)/g.h;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});drawCrop()});
     const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null};fr.addEventListener("pointerup",up);fr.addEventListener("pointercancel",up);
     fr.addEventListener("wheel",e=>{const it=cur();if(!it)return;e.preventDefault();it.z=Math.min(3,Math.max(1,it.z*(e.deltaY<0?1.06:1/1.06)));zr.value=it.z;drawCrop()},{passive:false});
+    // keyboard: arrows move the photo, + / - zoom
+    fr.addEventListener("keydown",e=>{const it=cur();if(!it)return;const st=e.shiftKey?.1:.03;const mv={ArrowLeft:[-st,0],ArrowRight:[st,0],ArrowUp:[0,-st],ArrowDown:[0,st]}[e.key];
+      if(mv){it.cx+=mv[0]/it.z;it.cy+=mv[1]/it.z}else if(e.key==="+"||e.key==="="){it.z=Math.min(3,it.z*1.08)}else if(e.key==="-"){it.z=Math.max(1,it.z/1.08)}else return;
+      e.preventDefault();zr.value=it.z;drawCrop()});
     zr.addEventListener("input",()=>{const it=cur();if(!it)return;it.z=+zr.value;drawCrop()});
     window.addEventListener("resize",()=>{if(!$("#cropper").hidden)drawCrop()})}
   function drawCrop(){const it=S.form.photos[S.form.sel];const fr=$("#cframe"),im=$("#cimg");if(!it)return;const r=formRatio();fr.style.aspectRatio=r;
@@ -1107,7 +1165,7 @@ function openProfile(){
     if(!S.db||!S.me){err.textContent="ログインすると投稿できるよ";err.hidden=false;return}
     const editing=S.form.editId;const pid=editing||Date.now().toString(36)+Math.random().toString(36).slice(2,7);
     const gm=safeGmap($("#pGmap").value||"");if($("#pGmap").value.trim()&&!gm){err.textContent="GoogleマップのURLがおかしいみたい。消すか貼りなおしてね";err.hidden=false;return}
-    const data={name,pref,city:S.form.city||null,addr:$("#pAddr").value.trim()||null,gmap:gm,genre:(document.querySelector('input[name=genre]:checked')||{}).value||"その他",rate:S.form.rate,price:$("#pPrice").value,comment:$("#pComment").value.trim(),photo:null,more:null,x:S.form.x,y:S.form.y,createdAt:editing?S.form.createdAt:Date.now()};if(editing)data.updatedAt=Date.now();
+    const data={name,pref,city:S.form.city||null,addr:$("#pAddr").value.trim()||null,gmap:gm,genre:(document.querySelector('input[name=genre]:checked')||{}).value||"その他",rate:S.form.rate,price:$("#pPrice").value,hours:$("#pHours").value.trim()||null,comment:$("#pComment").value.trim(),photo:null,more:null,x:S.form.x,y:S.form.y,createdAt:editing?S.form.createdAt:Date.now()};if(editing)data.updatedAt=Date.now();
     const btn=$("#pSubmit");btn.disabled=true;btn.textContent=editing?"更新中…":"投稿中…";
     // bake each crop into a JPEG: the cover rides in the post doc, photos 2-4 get their own docs (each under the 256KB limit)
     const items=S.form.photos;const r=formRatio();let cover=null,extras=[];
@@ -1128,19 +1186,19 @@ function openProfile(){
       po.append(el("button",{type:"button",class:"btn small ghost",disabled:i===0,onclick:()=>mv(-1),text:"← 前へ"}),
         el("button",{type:"button",class:"btn small ghost",disabled:i===0,onclick:()=>{ph.unshift(ph.splice(i,1)[0]);S.form.sel=0;setPhotoView()},text:"表紙にする"}),
         el("button",{type:"button",class:"btn small ghost",disabled:i===ph.length-1,onclick:()=>mv(1),text:"後ろへ →"}))}
-    $("#cropper").hidden=!ph.length;if(ph.length){$("#czoom").value=ph[S.form.sel].z;$("#cframe").setAttribute("aria-label",`写真${S.form.sel+1}の位置（ドラッグで動かす）`);requestAnimationFrame(drawCrop)}
+    $("#cropper").hidden=!ph.length;if(ph.length){$("#czoom").value=ph[S.form.sel].z;$("#cframe").setAttribute("aria-label",`写真${S.form.sel+1}の位置（ドラッグか矢印キーで動かす、＋−でズーム）`);requestAnimationFrame(drawCrop)}
     const z=$("#dropZone");z.hidden=ph.length>=3;z.textContent="";z.append(el("span",{text:ph.length?`写真を追加（あと${3-ph.length}枚）`:"タップして写真をえらぶ（3枚まで）"}))}
   function setMode(edit){$("#postTitle").textContent=edit?"投稿を編集":"お店を投稿";$("#pSubmit").textContent=edit?"更新する":"投稿する";$("#pCancel").hidden=!edit}
   window.startEdit=p=>{resetForm();const arK=Object.keys(ARS).find(k=>ARS[k]&&Math.abs(ARS[k]-(+p.ar||0))<.01)||(p.ar?"orig":"1:1");
     S.form={rate:p.rate||3,photos:[],ar:arK,sel:null,oldPics:p.pics|0,x:p.x??null,y:p.y??null,city:p.city||null,editId:p.id,createdAt:p.createdAt||Date.now()};
-    $("#pName").value=p.name||"";$("#pAddr").value=p.addr||"";$("#pGmap").value=p.gmap||"";$("#pPrice").value=p.price||"";$("#pComment").value=p.comment||"";
+    $("#pName").value=p.name||"";$("#pAddr").value=p.addr||"";$("#pGmap").value=p.gmap||"";$("#pPrice").value=p.price||"";$("#pHours").value=p.hours||"";$("#pComment").value=p.comment||"";
     const g=document.querySelector(`input[name=genre][value="${CSS.escape(p.genre||"その他")}"]`);if(g)g.checked=true;
     sel.value=p.pref||"";if(p.pref)showPref(p.pref,true);drawRate();setPhotoView();updateGm();setMode(true);go("post");
     // load the saved photos back in so they can be re-framed
     const id=p.id;(async()=>{const srcs=p.pics?[p.photo,...await getPics(p)]:photosOf(p);const its=[];for(const u of srcs){if(!okImg(u))continue;try{its.push({img:await loadImg(u),z:1,cx:.5,cy:.5})}catch(e){}}
       if(S.form.editId===id&&!S.form.photos.length){S.form.photos=its;setPhotoView()}})()};
   window.newPost=()=>{if(S.form.editId)resetForm()};
-  function resetForm(){$("#postForm").reset();S.form={rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null};drawRate();$("#miniWrap").hidden=true;$("#cityWrap").hidden=true;gmHint.classList.remove("ok");gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";addrHint.hidden=true;suggBox.hidden=true;setPhotoView();setMode(false);const g0=$("#g0");if(g0)g0.checked=true}
+  function resetForm(){$("#postForm").reset();S.form={rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null};drawRate();$("#miniWrap").hidden=true;$("#cityWrap").hidden=true;gmHint.classList.remove("ok");gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";addrHint.hidden=true;suggBox.hidden=true;$("#osmList").hidden=true;setPhotoView();setMode(false);const g0=$("#g0");if(g0)g0.checked=true}
 })();
 // ---------- photo framing ----------
 const ARS={"1:1":1,"4:5":.8,"16:9":16/9,"orig":null};
@@ -1161,6 +1219,39 @@ function shrink(file,target=170000){return new Promise((res,rej)=>{const url=typ
   if(typeof file!=="string")URL.revokeObjectURL(url);out.length<(typeof file==="string"?target:230000)?res(out):rej(new Error("too big"))};img.onerror=rej;img.src=url})}
 
 
+// ---------- 通報: saved for the site owner; offers to block right away ----------
+const REPORT_REASONS=["いやがらせ・悪口","不快・不適切な内容","スパム・宣伝","なりすまし","個人情報がのっている","その他"];
+function openReport({target,post,react}){if(!S.sb||!S.me)return;const m=$("#modal");m.textContent="";let reason="";
+  const detail=el("textarea",{maxlength:"400",placeholder:"くわしく（なくてもOK）","aria-label":"くわしく"});const err=el("p",{class:"err",hidden:true});
+  const opts=el("div",{class:"choices",role:"radiogroup","aria-label":"通報の理由"},...REPORT_REASONS.map(t=>el("button",{type:"button",class:"choice","aria-pressed":"false",onclick:e=>{reason=t;opts.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b===e.currentTarget?"true":"false"))},text:t})));
+  const send=el("button",{class:"btn yolk",type:"submit",text:"通報する"});
+  const f=el("form",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:(target?nick(target)+"さんを":"")+"通報"}),el("p",{class:"sub",text:"通報は運営者だけが見るよ。相手には知らされないよ"}),opts,detail,err,
+    el("div",{class:"row-gap"},send,el("button",{class:"btn ghost",type:"button",onclick:()=>m.hidden=true,text:"やめる"})));
+  f.onsubmit=async ev=>{ev.preventDefault();if(!reason){err.textContent="理由をえらんでね";err.hidden=false;return}send.disabled=true;
+    const {error}=await S.sb.from("reports").insert({reporter:S.me,target:target||null,post_id:post||null,react_id:react||null,reason,detail:detail.value.trim()||null});
+    if(error){send.disabled=false;err.textContent=/row-level|violates/i.test(error.message)?"今日はこれ以上通報できないよ。時間をおいてね":"送れなかった。もう一度ためしてね";err.hidden=false;return}
+    f.textContent="";f.append(el("h2",{style:"font-size:18px",text:"通報を受けつけたよ"}),el("p",{class:"sub",text:"ありがとう。この人の投稿を見たくないときはブロックできるよ"}),
+      el("div",{class:"row-gap"},target&&!iBlocked(target)?el("button",{class:"btn danger",type:"button",onclick:()=>{m.hidden=true;setRel(target,"block")},text:"ブロックする"}):null,el("button",{class:"btn ghost",type:"button",onclick:()=>m.hidden=true,text:"閉じる"})))};
+  m.append(f);m.hidden=false}
+// ---------- アカウント削除: photos first (Storage API), then the login and every row ----------
+function openDeleteAccount(){const m=$("#modal");m.textContent="";const pw=el("input",{type:"password",autocomplete:"current-password","aria-label":"パスワード"});const err=el("p",{class:"err",hidden:true});
+  const go_=el("button",{class:"btn danger",type:"submit",text:"完全に削除する"});
+  const f=el("form",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:"アカウントを削除"}),
+    el("p",{class:"sub",text:"投稿・写真・コメント・フォロー・行きたいリストがすべて消えて、元にもどせないよ。続けるならパスワードを入れてね"}),el("label",{class:"f"},"パスワード",pw),err,
+    el("div",{class:"row-gap"},go_,el("button",{class:"btn ghost",type:"button",onclick:()=>m.hidden=true,text:"やめる"})));
+  f.onsubmit=async ev=>{ev.preventDefault();err.hidden=true;go_.disabled=true;go_.textContent="削除中…";
+    try{const {data:ok,error:e0}=await S.sb.rpc("verify_my_password",{p_password:pw.value});if(e0)throw e0;if(!ok)throw new Error("pw");
+      const st=S.sb.storage.from("photos");for(let i=0;i<20;i++){const {data:files,error:e1}=await st.list(S.me,{limit:100});if(e1)throw e1;if(!files||!files.length)break;
+        const {error:e2}=await st.remove(files.map(x=>S.me+"/"+x.name));if(e2)throw e2}
+      const {data:done,error:e3}=await S.sb.rpc("delete_my_account",{p_password:pw.value});if(e3)throw e3;if(!done)throw new Error("pw");
+      try{localStorage.clear()}catch(e){}await S.sb.auth.signOut().catch(()=>{});location.replace(APP_URL)}
+    catch(e){go_.disabled=false;go_.textContent="完全に削除する";err.textContent=e&&e.message==="pw"?"パスワードがちがうみたい":"うまく削除できなかった。もう一度ためしてね";err.hidden=false}};
+  m.append(f);m.hidden=false;setTimeout(()=>pw.focus(),50)}
+// strangers are never listed: an exact @ID asks the server for that one person
+let findT;async function findById(qid){if(!S.sb||!ID_RE.test(qid))return;if(S.found&&S.found.handle===qid)return;S.finding=true;renderFriends();
+  try{const {data,error}=await S.sb.rpc("find_user",{p_handle:qid});if(error)throw error;const r=data&&data[0];S.found={handle:qid,id:r?r.id:null,data:r?r.data:null}}catch(e){S.found={handle:qid,id:null}}
+  S.finding=false;renderFriends()}
+document.addEventListener("input",e=>{if(e.target.id!=="fSearch")return;const qid=e.target.value.trim().toLowerCase().replace(/^@/,"");clearTimeout(findT);if(ID_RE.test(qid))findT=setTimeout(()=>findById(qid),400)});
 // ---------- login (Supabase Auth: email + password) ----------
 async function signOut(){if(!S.sb)return;if(!confirm("ログアウトする？"))return;await S.sb.auth.signOut();location.reload()}
 // Login is ID + password. Supabase Auth needs an email-shaped username, so the ID is stored as "<id>@harapangram.invalid"
@@ -1186,6 +1277,7 @@ function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;docum
   const pass2=el("input",{type:"password",autocomplete:"new-password",minlength:"8"});
   const phraseIn=el("input",{type:"text",maxlength:"100",autocomplete:"off",spellcheck:"false",placeholder:"例：はじめて飼った犬の名前"});
   const curPass=el("input",{type:"password",autocomplete:"current-password"});
+  const agree=el("input",{type:"checkbox"});
   const btn=el("button",{class:"btn",type:"submit",text:{login:"ログイン",signup:"アカウントを作る",newpass:"パスワードを変更",forgot:"パスワードを変更",phrase:"あいことばを保存"}[mode]});
   if(mode==="forgot")card.append(el("p",{class:"sub",text:"登録したときの「秘密のあいことば」が合っていれば、新しいパスワードにできるよ。5回まちがえると30分待ってね"}));
   if(mode==="phrase")card.append(el("p",{class:"sub",text:"パスワードを忘れたとき、IDとこのあいことばで新しいパスワードにできるよ。人に知られにくい答えにしてね"}));
@@ -1198,7 +1290,10 @@ function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;docum
     mode==="phrase"?null:lab(mode==="login"?"パスワード":newPw&&mode!=="signup"?"新しいパスワード":"パスワード",pass,mode==="login"?null:"8文字以上"),
     newPw?lab("パスワード（確認）",pass2):null,
     mode==="signup"?lab("秘密のあいことば",phraseIn,"パスワードを忘れたときに使うよ。4文字以上で、人に知られにくい答えにしてね"):null,
+    mode==="signup"?el("label",{class:"chk agree"},agree,el("span",{},el("a",{href:"terms.html",target:"_blank",rel:"noopener",text:"利用規約"}),"と",el("a",{href:"privacy.html",target:"_blank",rel:"noopener",text:"プライバシーポリシー"}),"に同意する")):null,
     msg,btn);card.append(f);
+  let hasInv=false;try{hasInv=!!sessionStorage.getItem("hp_invite")}catch(e){}
+  if(hasInv&&(mode==="signup"||mode==="login"))card.insertBefore(el("p",{class:"invnote",text:"招待リンクから開いたよ。アカウントを作るかログインすると、招待した人にフォロー申請が届くよ"}),f);
   const sb=S.sb;
   f.onsubmit=async ev=>{ev.preventDefault();say("");
     const id=idIn.value.trim().toLowerCase();
@@ -1208,6 +1303,7 @@ function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;docum
     const phrase=normPhrase(phraseIn.value);
     if((mode==="signup"||mode==="phrase")&&[...phrase].length<4)return say("あいことばは4文字以上にしてね");
     if(mode==="forgot"&&!phrase)return say("あいことばを入れてね");
+    if(mode==="signup"&&!agree.checked)return say("利用規約とプライバシーポリシーへの同意が必要だよ");
     const name=nameIn.value.trim().normalize("NFKC");
     if(mode==="signup"&&!name)return say("名前を入れてね");
     btn.disabled=true;
@@ -1231,6 +1327,7 @@ function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;docum
   else if(mode==="signup"||mode==="forgot")links.append(link("ログインにもどる",()=>showAuth("login")));
   if(mode==="newpass"||mode==="phrase")links.append(link("やめる",close));
   else links.append(link("ログインせずにサンプルを見る",()=>{close();S.sample=true;renderAll()}));
+  if(mode==="login")links.append(el("div",{class:"row-gap",style:"gap:16px;justify-content:center"},el("a",{class:"linkish",href:"terms.html",target:"_blank",rel:"noopener",text:"利用規約"}),el("a",{class:"linkish",href:"privacy.html",target:"_blank",rel:"noopener",text:"プライバシーポリシー"})));
   setTimeout(()=>(mode==="signup"?nameIn:usesId?idIn:mode==="phrase"?curPass:pass).focus(),50)}
 function authErr(e){const m=String(e&&e.message||e||"");
   if(/Invalid login credentials/i.test(m))return"IDかパスワードがちがうみたい";
@@ -1252,6 +1349,7 @@ function syncPostSubs(){if(!S.db||!S.me)return;const want=new Set([S.me,...mutua
 async function boot(){
   buildMap($("#bigMap"));$("#bigMap").addEventListener("click",onBigMapClick);
   renderAll();
+  try{const inv=new URLSearchParams(location.search).get("invite");if(inv){sessionStorage.setItem("hp_invite",inv.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8));history.replaceState(null,"",APP_URL)}}catch(e){}
   const cfg=window.HP_CONFIG||{};
   if(!cfg.url||!cfg.anonKey||!window.supabase){S.offline=true;S.ready=true;renderAll();showAuth("setup");return}
   const sb=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});S.sb=sb;

@@ -63,7 +63,22 @@
   - あいことばは、全角半角・大文字小文字・空白のちがいを気にしません（ひらがなとカタカナは別あつかいです）。
 - ログイン中は、マイページの「パスワード変更」「あいことば変更」で変えられます（あいことばの変更には今のパスワードが必要です）。
 - ID とあいことばの両方を忘れると、元にもどせません。
-- 友だちには「名前」と「@ID」が表示され、「ともだち」画面で名前か ID で探せます。
+- 友だちには「名前」と「@ID」が表示されます。知らない人は一覧に出ず、「ともだち」画面で ID をぴったり入れたときだけ1人見つかります（招待リンクでもつながれます）。
+
+## 安全のしくみ
+
+- 通報：投稿・コメント・ユーザーの「通報」から送れます。届いた通報は Supabase の「Table Editor」→ `reports` で見られます。
+- 退会：マイページの「アカウントを削除」で、写真・投稿・フォローなどすべてが消えます（パスワードが必要）。
+- [利用規約](terms.html) と [プライバシーポリシー](privacy.html) は、登録時に同意してもらいます。
+- 画面には Content-Security-Policy を設定し、決まった通信先（Supabase・OpenStreetMap）以外には送れないようにしています。
+
+## schema.sql を更新したとき
+
+`supabase/schema.sql` は何回実行しても大丈夫なように書いてあります。更新されたら、SQL Editor で全部を貼りなおして「Run」してください（データは消えません）。
+
+## 本番テスト
+
+「Actions」→「live-test」→「Run workflow」で、テスト用アカウントを3つ作って、相互フォロー・写真投稿・見える範囲・削除を本番で確かめます。テスト用アカウントは最後に自動で削除されます。
 
 ## あとからできること
 
@@ -74,5 +89,8 @@
 - `index.html` … アプリ本体（`src.html` から `build.py` で作成）
 - `supabase.js` … @supabase/supabase-js 2.117.2（MIT, `supabase-LICENSE.txt`）
 - `supabase/schema.sql` … テーブルとアクセス制限
+- `terms.html` / `privacy.html` … 利用規約・プライバシーポリシー
+- `tests/live-e2e.js` / `.github/workflows/live-test.yml` … 本番テスト
 - `.github/workflows/keepalive.yml` … 休止防止
 - 地図データ：jpn-atlas（BSD-3）、市区町村名：jp-local-gov（MIT）
+- お店の場所・営業時間の検索：OpenStreetMap / Nominatim（ボタンを押したときだけ、1秒に1回まで）

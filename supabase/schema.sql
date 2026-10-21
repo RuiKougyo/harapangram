@@ -47,6 +47,7 @@ create table if not exists public.posts(
 -- up to 3 photos per post: the cover + 2 more
 alter table public.posts drop constraint if exists posts_pics;
 alter table public.posts add constraint posts_pics check (coalesce(data->>'pics', '0') ~ '^[0-2]$');
+create unique index if not exists profiles_invite_code on public.profiles ((data->>'inviteCode')) where data ? 'inviteCode';
 create index if not exists posts_author_created on public.posts(author, created_at desc);
 
 create or replace function public.try_uuid(t text) returns uuid
@@ -107,6 +108,16 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 grant execute on function public.try_uuid(text) to authenticated;
+-- may the signed-in user see u's profile? self, anyone with a follow arrow either way, or a mutual of a mutual
+create or replace function public.is_connected(u uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select u = auth.uid()
+    or exists(select 1 from public.follow_edges where (src = u and dst = auth.uid()) or (src = auth.uid() and dst = u))
+    or exists(select 1 from public.follow_edges e1 join public.follow_edges e2 on e2.src = e1.dst and e2.dst = e1.src
+              where e1.src = auth.uid() and public.is_mutual(e1.dst, u))
+$$;
+revoke all on function public.is_connected(uuid) from public, anon;
+grant execute on function public.is_connected(uuid) to authenticated;
 revoke all on function public.is_mutual(uuid, uuid) from public, anon;
 revoke all on function public.can_see(uuid) from public, anon;
 revoke all on function public.blocked_by(uuid) from public, anon;
@@ -148,8 +159,8 @@ do $$ declare r record; begin
   end loop;
 end $$;
 
--- profiles: every signed-in user can read (needed to find friends by nickname / invite code)
-create policy profiles_read on public.profiles for select to authenticated using (true);
+-- profiles: only people you are connected to; strangers are found one at a time by exact @ID or invite code (find_user / find_by_invite)
+create policy profiles_read on public.profiles for select to authenticated using (public.is_connected(id));
 create policy profiles_ins on public.profiles for insert to authenticated with check (id = auth.uid());
 create policy profiles_upd on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
 create policy profiles_del on public.profiles for delete to authenticated using (id = auth.uid());
@@ -288,3 +299,70 @@ revoke all on function public.has_secret_phrase() from public, anon;
 grant execute on function public.set_secret_phrase(text, text) to authenticated;
 grant execute on function public.reset_password_with_phrase(text, text, text) to anon, authenticated;
 grant execute on function public.has_secret_phrase() to authenticated;
+
+-- ---------- finding people without listing everyone ----------
+create or replace function public.find_user(p_handle text) returns table(id uuid, data jsonb)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.data - 'inviteCode' - 'invitedBy' from public.profiles p
+  where p.data->>'handle' = lower(trim(p_handle)) and auth.uid() is not null and not public.blocked_by(p.id)
+  limit 1
+$$;
+create or replace function public.find_by_invite(p_code text) returns table(id uuid, data jsonb)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.data - 'inviteCode' - 'invitedBy' from public.profiles p
+  where p.data->>'inviteCode' = upper(trim(p_code)) and auth.uid() is not null and not public.blocked_by(p.id)
+  limit 1
+$$;
+revoke all on function public.find_user(text) from public, anon;
+revoke all on function public.find_by_invite(text) from public, anon;
+grant execute on function public.find_user(text) to authenticated;
+grant execute on function public.find_by_invite(text) to authenticated;
+
+-- ---------- reports (通報) ----------
+-- R reads them in Supabase: Table Editor → reports
+create table if not exists public.reports(
+  id bigint generated always as identity primary key,
+  reporter uuid not null default auth.uid() references auth.users on delete cascade,
+  target uuid references auth.users on delete set null,
+  post_id text,
+  react_id text,
+  reason text not null,
+  detail text,
+  created_at timestamptz not null default now(),
+  constraint reports_reason check (length(reason) between 1 and 40),
+  constraint reports_detail check (detail is null or length(detail) <= 400)
+);
+alter table public.reports enable row level security;
+revoke all on public.reports from anon;
+grant select, insert on public.reports to authenticated;
+drop policy if exists reports_ins on public.reports;
+drop policy if exists reports_read on public.reports;
+create policy reports_read on public.reports for select to authenticated using (reporter = auth.uid());
+create policy reports_ins on public.reports for insert to authenticated
+  with check (reporter = auth.uid() and target is distinct from auth.uid()
+    and (select count(*) from public.reports r where r.reporter = auth.uid() and r.created_at > now() - interval '1 day') < 20);
+
+-- ---------- delete my account ----------
+-- the page removes the photo files first (Storage API), then this deletes the login and every row (on delete cascade)
+create or replace function public.delete_my_account(p_password text) returns boolean
+language plpgsql security definer set search_path = public, extensions as $$
+declare u auth.users%rowtype;
+begin
+  select * into u from auth.users where id = auth.uid();
+  if u.id is null or u.encrypted_password is null or extensions.crypt(p_password, u.encrypted_password) <> u.encrypted_password then
+    return false;
+  end if;
+  delete from auth.users where id = u.id;
+  return true;
+end $$;
+revoke all on function public.delete_my_account(text) from public, anon;
+grant execute on function public.delete_my_account(text) to authenticated;
+
+-- checks the signed-in user's password (used before deleting the account)
+create or replace function public.verify_my_password(p_password text) returns boolean
+language sql stable security definer set search_path = public, extensions as $$
+  select coalesce((select extensions.crypt(p_password, u.encrypted_password) = u.encrypted_password
+    from auth.users u where u.id = auth.uid() and u.encrypted_password is not null), false)
+$$;
+revoke all on function public.verify_my_password(text) from public, anon;
+grant execute on function public.verify_my_password(text) to authenticated;
