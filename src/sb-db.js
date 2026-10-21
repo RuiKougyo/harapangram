@@ -71,7 +71,7 @@ function makeSbDb(sb, me){
         const path=`${me}/${r.id}_0_${Date.now().toString(36)}.jpg`;await upload(path,d.photo);d.photo="sb:"+path;
         const op=old&&old.data&&old.data.photo;if(typeof op==="string"&&op.startsWith("sb:")&&op.slice(3)!==path)await sb.storage.from(BUCKET).remove([op.slice(3)])}
       else if(typeof d.photo==="string"&&back.has(d.photo))d.photo="sb:"+back.get(d.photo);
-      return chk(await sb.from("posts").upsert({author:me,id:r.id,created_at:+d.createdAt||Date.now(),data:d},{onConflict:"author,id"}))}
+      const res=chk(await sb.from("posts").upsert({author:me,id:r.id,created_at:+d.createdAt||Date.now(),data:d},{onConflict:"author,id"}));ring();return res}
     if(r.t==="reacts")return chk(await sb.from("reacts").upsert({author:me,id:r.id,at:+data.at||Date.now(),data},{onConflict:"author,id"}));
     if(r.t==="user_data")return chk(await sb.from("user_data").upsert({owner:me,id:r.id,data},{onConflict:"owner,id"}));
     throw new Error("no write "+r.t)}
@@ -79,15 +79,18 @@ function makeSbDb(sb, me){
     if(r.t==="pics"){const {error}=await sb.storage.from(BUCKET).remove([`${me}/${r.id}.jpg`]);if(error)throw fail(error);return}
     if(r.t==="posts"){const old=chk(await sb.from("posts").select("data").eq("author",me).eq("id",r.id).maybeSingle());const op=old&&old.data&&old.data.photo;
       chk(await sb.from("posts").delete().eq("author",me).eq("id",r.id));
-      if(typeof op==="string"&&op.startsWith("sb:"))await sb.storage.from(BUCKET).remove([op.slice(3)]);return}
+      if(typeof op==="string"&&op.startsWith("sb:"))await sb.storage.from(BUCKET).remove([op.slice(3)]);ring();return}
     if(r.t==="follows")return writeFollows({ids:[]});
     return chk(await keyed(sb.from(r.t).delete(),r))}
 
   // ---- live updates: any change on the table refetches this listener (debounced), plus a slow poll as a safety net ----
   const live=new Set();let chan=null,timer=null;
+  function ring(){try{if(chan)chan.send({type:"broadcast",event:"posts",payload:{}})}catch(e){}}
   function kick(tables){for(const l of live)if(!tables||l.tables.some(t=>tables.includes(t)))l.refresh()}
   function ensureChannel(){if(chan)return;chan=sb.channel("hp-live");
     for(const t of ["profiles","follow_edges","follow_meta","posts","reacts","user_data"])chan.on("postgres_changes",{event:"*",schema:"public",table:t},()=>kick([t]));
+    // a new post also rings an empty broadcast so friends refetch at once (no content is sent; what they can read is still decided by RLS)
+    chan.on("broadcast",{event:"posts"},()=>kick(["posts"]));
     chan.subscribe();timer=setInterval(()=>{if(document.visibilityState==="visible")kick()},90000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")kick()})}
   function listen(r,opt,cb,err){const l={tables:TABLES[r.t]||[],busy:false,again:false,t:0,dead:false};
