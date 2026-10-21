@@ -48,6 +48,8 @@ header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
 .top .me span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 main{padding-block:18px 120px}
+/* the genre ring and pick rail reach past the screen edge; clip it so the page never scrolls sideways (pinch-zoom out and back used to leave the timeline shifted) */
+html,body{overflow-x:clip}
 section[data-view]{display:flex;flex-direction:column;gap:14px}
 h2{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.01em;margin:0;text-wrap:balance}
 .sub{color:var(--muted);font-size:13px;margin:0}
@@ -165,6 +167,11 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .item .txt .handle{color:var(--muted);font-size:12px}
 .item .txt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .txt small{color:var(--muted);font-size:12px}
+.profbtn{background:none;border:0;padding:0;border-radius:50%;min-width:44px;min-height:44px;display:grid;place-items:center;flex:none;cursor:pointer}
+.namebtn{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;min-height:24px;max-width:100%;cursor:pointer;display:block}
+.namebtn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.namebtn:hover b{text-decoration:underline;text-underline-offset:3px}
+.tabstat{font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px}.tabstat[aria-pressed=true]{background:var(--noren);color:var(--surface);border-color:var(--noren)}.tabstat[aria-pressed=true] small{color:inherit}
+.fprof .stat{padding:8px 8px}.fprof .stat b{font-size:19px}.fprof .item{padding:10px 4px}
 .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .badge.mutual{background:var(--ok);color:var(--surface)}
 .badge.inv{background:var(--yolk);color:var(--yolk-ink)}
@@ -554,9 +561,10 @@ const sv=(tag,attrs={})=>{const e=document.createElementNS(SVGNS,tag);for(const[
 
 // ---------- state ----------
 const APP_URL=location.origin+location.pathname;
-const S={saves:{},reacts:{},reactSubs:{},notifSeen:0,gotState:false,autoBusy:false,q:"",sort:"new",price:"",cmtFor:null,genreIdx:0,picks:[],pickIdx:0,pickKey:null,db:null,user:null,me:null,ready:false,offline:false,sample:false,profiles:{},follows:{},postsBy:{},postSubs:{},writeBusy:false,view:"feed",mapPref:null,mapCity:null,form:{rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null}};
+const S={saves:{},reacts:{},reactSubs:{},notifSeen:0,gotState:false,autoBusy:false,q:"",sort:"new",price:"",cmtFor:null,genreIdx:0,picks:[],pickIdx:0,pickKey:null,db:null,user:null,me:null,ready:false,offline:false,sample:false,profiles:{},ext:{},follows:{},postsBy:{},postSubs:{},writeBusy:false,view:"feed",mapPref:null,mapCity:null,form:{rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null}};
 function colorOf(id){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]}
-function nick(id){if(S.sample&&SAMPLE.profiles[id])return SAMPLE.profiles[id].nick;return (S.profiles[id]&&S.profiles[id].nick)||"だれか"}
+function nick(id){if(S.sample&&SAMPLE.profiles[id])return SAMPLE.profiles[id].nick;return (prof(id)||{}).nick||"だれか"}
+function prof(id){return S.profiles[id]||S.ext[id]}
 // follows/{uid} = {ids, since:{id:ts}, blocked:[], declined:[], invAccepted:[]}
 function myF(){return S.follows[S.me]||{}}
 function iFollow(id){return (myF().ids||[]).includes(id)}
@@ -696,7 +704,7 @@ function stat(v,l){return el("div",{class:"stat"},el("b",{text:String(v)}),el("s
 // ---------- rendering ----------
 function bowl(on){const s=sv("svg",{viewBox:"0 0 24 24","aria-hidden":"true"});s.append(sv("path",{d:"M2 11h20a10 8.5 0 0 1-20 0z",fill:on?"var(--yolk)":"var(--line)"}),sv("path",{d:"M4.5 11c1.5-3.5 4.5-5 7.5-5s6 1.5 7.5 5",fill:on?"#fff":"var(--surface)",stroke:on?"var(--yolk)":"var(--line)","stroke-width":"1"}));return s}
 function hara(n){const w=el("span",{class:"hara","aria-label":`満足度 ${n}/5`},el("span",{class:"lbl",text:"満足度"}));for(let i=1;i<=5;i++)w.append(bowl(i<=n));return w}
-function iconOf(id){const u=S.profiles[id]&&S.profiles[id].icon;return typeof u==="string"&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:null}
+function iconOf(id){const u=(prof(id)||{}).icon;return typeof u==="string"&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:null}
 function avatar(id,big,src){const u=src!==undefined?src:iconOf(id);const c="av"+(big?" big":"");if(u)return el("img",{class:c,src:u,alt:""});return el("div",{class:c,style:`background:${colorOf(id)}`,text:(nick(id)||"?").slice(0,1)})}
 // square center crop for profile icons
 function shrinkIcon(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{const k=Math.min(img.width,img.height);const c=document.createElement("canvas");c.width=c.height=256;
@@ -727,7 +735,7 @@ function photoEl(p,cls="photo"){if(p.photo){if(cls==="photo"){const a=photoAttrs
 function postCard(p){
   const mine=p.author===S.me&&!p.sample;
   return el("article",{class:"card post"},
-    el("div",{class:"head"},el("button",{type:"button",style:"background:none;border:0;padding:0;border-radius:50%;min-width:44px;min-height:44px;display:grid;place-items:center","aria-label":nick(p.author)+"の投稿をまとめて見る",onclick:()=>openViewer(0,p.id)},avatar(p.author)),el("div",{class:"who"},el("b",{text:mine?nick(p.author)+"（自分）":nick(p.author)}),el("small",{text:ago(p.createdAt)+(p.updatedAt?"・編集済み":"")})),p.sample?el("span",{class:"sample-flag",style:"margin-left:auto",text:"サンプル"}):null),
+    el("div",{class:"head"},el("button",{type:"button",style:"background:none;border:0;padding:0;border-radius:50%;min-width:44px;min-height:44px;display:grid;place-items:center","aria-label":nick(p.author)+"の投稿をまとめて見る",onclick:()=>openViewer(0,p.id)},avatar(p.author)),el("div",{class:"who"},p.sample?el("b",{text:nick(p.author)}):el("button",{type:"button",class:"namebtn",onclick:()=>openFriendProfile(p.author)},el("b",{text:mine?nick(p.author)+"（自分）":nick(p.author)})),el("small",{text:ago(p.createdAt)+(p.updatedAt?"・編集済み":"")})),p.sample?el("span",{class:"sample-flag",style:"margin-left:auto",text:"サンプル"}):null),
     gallery(p),
     el("div",{class:"body"},
       el("h3",{class:"shop",text:p.name}),
@@ -912,7 +920,8 @@ $("#ring").addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){setGenre(S.gen
   r.addEventListener("click",e=>{if(r.dataset.swiped){e.stopPropagation();e.preventDefault()}},true)}
 window.addEventListener("resize",()=>{if(S.view==="feed")renderFeed()});
 function relBadge(id){const a=iFollow(id),b=followsMe(id);if(a&&b)return el("span",{class:"badge mutual",text:"相互フォロー"});if(b)return el("span",{class:"badge one",text:"フォローされてる"});if(a)return el("span",{class:"badge one",text:"フォロー中"});return null}
-function friendRow(id,badge,...btns){const prof=S.profiles[id]||{};return el("div",{class:"item"},avatar(id),el("div",{class:"txt"},el("b",{text:nick(id)}),handleOf(id)?el("small",{class:"handle",text:"@"+handleOf(id)}):null,badge?el("div",{},badge):null,prof.bio?el("small",{text:prof.bio}):null),...btns)}
+function profBtn(id,child){return el("button",{type:"button",class:"profbtn","aria-label":nick(id)+"さんのプロフィール",onclick:()=>openFriendProfile(id)},child)}
+function friendRow(id,badge,...btns){const pr=prof(id)||{};return el("div",{class:"item"},profBtn(id,avatar(id)),el("div",{class:"txt"},el("button",{type:"button",class:"namebtn",onclick:()=>openFriendProfile(id)},el("b",{text:nick(id)})),handleOf(id)?el("small",{class:"handle",text:"@"+handleOf(id)}):null,badge?el("div",{},badge):null,pr.bio?el("small",{text:pr.bio}):null),...btns)}
 function renderFriends(){
   const box=$("#friendList");box.textContent="";const rq=$("#reqList");rq.textContent="";const bl=$("#blockList");bl.textContent="";rq.hidden=bl.hidden=true;
   renderInvite();
@@ -1034,7 +1043,7 @@ async function writeFollows(patch){const cur=myF();const data={ids:cur.ids||[],s
 async function toggleFollow(id){if(S.writeBusy)return;S.writeBusy=true;renderFriends();
   try{if(iFollow(id)){const since={...(myF().since||{})};delete since[id];await writeFollows({ids:(myF().ids||[]).filter(x=>x!==id),since})}
     else{await writeFollows(addFollow(id));if(followsMe(id))toast(nick(id)+"さんと相互フォローになった！")}}catch(e){writeErr(e)}
-  S.writeBusy=false;syncPostSubs();renderAll()}
+  S.writeBusy=false;syncPostSubs();renderAll();if(FP.id&&!$("#modal").hidden&&$("#modal .fprof"))renderFriendProfile()}
 async function setRel(id,kind){if(S.writeBusy)return;S.writeBusy=true;const f=myF();
   try{if(kind==="block"){const since={...(f.since||{})};delete since[id];await writeFollows({ids:(f.ids||[]).filter(x=>x!==id),since,blocked:[...new Set([...(f.blocked||[]),id])]});toast(nick(id)+"さんをブロックしたよ")}
     else if(kind==="unblock"){await writeFollows({blocked:(f.blocked||[]).filter(x=>x!==id)});toast("ブロックを解除したよ")}
@@ -1054,6 +1063,37 @@ async function claimName(n,oldNick){
   await ref.set({owner:S.me,at:Date.now()});
   if(oldNick){const o=S.db.doc("names/"+nameKey(oldNick));try{const g=await o.get();if(g.exists&&g.data().owner===S.me)await o.delete()}catch(e){}}
   return true}
+// ---------- someone's profile + their follow / follower lists ----------
+const FP={id:null,tab:null,lists:null,err:false};
+async function openFriendProfile(id){if(!id||S.sample)return;if(id===S.me){$("#modal").hidden=true;FP.id=null;go("mine");return}
+  if(V.open)closeViewer();FP.id=id;FP.tab=null;FP.lists=null;FP.err=false;renderFriendProfile();$("#modal").hidden=false;
+  const mutual=iFollow(id)&&followsMe(id);if(!mutual||S.offline)return;
+  try{const {data,error}=await S.sb.rpc("friend_lists",{p_uid:id});if(error)throw error;if(FP.id!==id)return;
+    const L={following:[],followers:[]};for(const r of data||[]){if(!S.profiles[r.id])S.ext[r.id]=r.data;(L[r.kind]||[]).push(r.id)}
+    FP.lists=L}catch(e){if(FP.id===id)FP.err=true}
+  if(FP.id===id&&!$("#modal").hidden)renderFriendProfile()}
+function closeFriendProfile(){FP.id=null;$("#modal").hidden=true}
+function followBtn(id){const f=iFollow(id);return el("button",{class:"btn small"+(f?" ghost":""),style:"white-space:nowrap",disabled:S.writeBusy||isBlocked(id),onclick:()=>toggleFollow(id),text:f?"フォロー解除":(followsMe(id)?"フォローを返す":"フォロー")})}
+function renderFriendProfile(){const id=FP.id;if(!id)return;const m=$("#modal");const keep=m.querySelector(".sheet")?.scrollTop||0;m.textContent="";
+  const pr=prof(id)||{};const mutual=iFollow(id)&&followsMe(id);
+  const head=el("div",{class:"row-gap",style:"gap:14px;flex-wrap:nowrap;align-items:center"},avatar(id,true),
+    el("div",{style:"flex:1;min-width:0"},el("h2",{style:"font-size:20px;margin:0;overflow-wrap:anywhere",text:nick(id)}),handleOf(id)?el("small",{class:"handle",style:"color:var(--muted)",text:"@"+handleOf(id)}):null,el("div",{style:"margin-top:4px"},relBadge(id))));
+  const box=el("div",{class:"card pad sheet fprof"},head,pr.bio?el("p",{style:"margin:10px 0 0",text:pr.bio}):null);
+  const posts=S.postsBy[id]||[];
+  if(mutual){const cities=new Set(posts.map(p=>p.city).filter(Boolean));const L=FP.lists;
+    const tab=(k,label)=>el("button",{type:"button",class:"stat tabstat","aria-pressed":String(FP.tab===k),onclick:()=>{FP.tab=FP.tab===k?null:k;renderFriendProfile()}},el("b",{text:L?String(L[k].length):"…"}),el("small",{text:label}));
+    box.append(el("div",{class:"stats",style:"margin-top:12px;grid-template-columns:repeat(4,1fr)"},stat(posts.length,"投稿"),stat(cities.size,"市区町村"),tab("following","フォロー"),tab("followers","フォロワー")))}
+  box.append(el("div",{class:"row-gap",style:"gap:8px;margin-top:12px;flex-wrap:wrap"},followBtn(id),
+    mutual&&posts.length?el("button",{class:"btn small yolk",onclick:()=>{closeFriendProfile();const i=storyPeople(visiblePosts()).findIndex(pp=>pp.id===id);openViewer(Math.max(0,i))},text:"投稿を見る"}):null));
+  if(!mutual)box.append(el("p",{class:"sub",style:"margin-top:10px",text:"相互フォローになると、投稿やフォロー・フォロワーが見られるよ"}));
+  if(mutual&&FP.tab){const list=el("div",{class:"list",style:"margin-top:10px"});box.append(el("div",{class:"secttl",style:"margin-top:12px",text:FP.tab==="following"?nick(id)+"さんがフォローしている人":nick(id)+"さんのフォロワー"}),list);
+    if(FP.err)list.append(el("p",{class:"empty",text:"読み込めなかった。もう一度開いてね"}));
+    else if(!FP.lists)list.append(el("p",{class:"empty",text:"読み込み中…"}));
+    else{const ids=FP.lists[FP.tab].filter(x=>!iBlocked(x));if(!ids.length)list.append(el("p",{class:"empty",text:"まだいないよ"}));
+      ids.sort((a,b)=>(b===S.me)-(a===S.me)||nick(a).localeCompare(nick(b),"ja"));
+      for(const x of ids)list.append(friendRow(x,x===S.me?el("span",{class:"badge one",text:"自分"}):relBadge(x),x===S.me?null:followBtn(x)))}}
+  box.append(el("button",{type:"button",class:"btn ghost",style:"margin-top:12px;width:100%",onclick:closeFriendProfile,text:"閉じる"}));
+  m.append(box);box.scrollTop=keep}
 function openProfile(){
   const me=S.profiles[S.me]||{};const m=$("#modal");m.textContent="";
   const nickIn=el("input",{type:"text",id:"profNick",maxlength:"20",value:me.nick||S.defaultName||""});
@@ -1266,7 +1306,7 @@ const ID_DOMAIN="harapangram.invalid",ID_RE=/^[a-z0-9_]{4,20}$/;
 const idMail=id=>id+"@"+ID_DOMAIN;
 // あいことば: compared loosely (width, case, spaces) so small typing differences still match
 const normPhrase=t=>String(t||"").normalize("NFKC").toLowerCase().replace(/\s+/g," ").trim();
-function handleOf(id){return (S.profiles[id]&&S.profiles[id].handle)||""}
+function handleOf(id){return (prof(id)||{}).handle||""}
 function showAuth(mode){const a=$("#auth");a.textContent="";a.hidden=false;document.body.classList.add("authing");
   const close=()=>{a.hidden=true;document.body.classList.remove("authing")};
   const card=el("div",{class:"authcard"});a.append(card);

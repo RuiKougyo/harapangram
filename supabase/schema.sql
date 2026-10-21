@@ -318,6 +318,20 @@ revoke all on function public.find_by_invite(text) from public, anon;
 grant execute on function public.find_user(text) to authenticated;
 grant execute on function public.find_by_invite(text) to authenticated;
 
+-- a friend's follow / follower lists: only for yourself or a mutual friend; people who blocked you are left out
+create or replace function public.friend_lists(p_uid uuid) returns table(kind text, id uuid, data jsonb)
+language sql stable security definer set search_path = public as $$
+  select x.k, p.id, p.data - 'inviteCode' - 'invitedBy' from (
+    select 'following'::text k, e.dst uid from public.follow_edges e where e.src = p_uid
+    union all
+    select 'followers'::text, e.src from public.follow_edges e where e.dst = p_uid) x
+  join public.profiles p on p.id = x.uid
+  where auth.uid() is not null and (p_uid = auth.uid() or public.is_mutual(auth.uid(), p_uid))
+    and not public.blocked_by(p.id) and not public.blocked_by(p_uid)
+$$;
+revoke all on function public.friend_lists(uuid) from public, anon;
+grant execute on function public.friend_lists(uuid) to authenticated;
+
 -- ---------- reports (通報) ----------
 -- R reads them in Supabase: Table Editor → reports
 create table if not exists public.reports(

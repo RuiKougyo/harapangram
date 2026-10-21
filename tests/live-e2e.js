@@ -49,6 +49,8 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     if(await art.count()){await art.scrollIntoViewIfNeeded();await W(3000);const im=await art.locator("img").evaluateAll(a=>a.map(i=>i.naturalWidth));ok("bSeesPhotos",im.filter(w=>w>0).length>=2);out.bImgs=im}
     // C (one-way) sees nothing, even asking the database and storage directly
     ok("cNoRows",await C.p.evaluate(async a=>(await S.sb.from("posts").select("id").eq("author",a)).data.length===0,A.me));
+    ok("bSeesALists",await B.p.evaluate(async a=>{const r=await S.sb.rpc("friend_lists",{p_uid:a});return !r.error&&r.data.length>0},A.me));
+    ok("cNoLists",await C.p.evaluate(async a=>{const r=await S.sb.rpc("friend_lists",{p_uid:a});return !r.error&&r.data.length===0},A.me));
     ok("cNoPhoto",await C.p.evaluate(async path=>{const r=await S.sb.storage.from("photos").createSignedUrl(path,60);return !r.data||!r.data.signedUrl},post&&post.data.photo.slice(3)));
     ok("cNoWrite",await C.p.evaluate(async a=>!!(await S.sb.from("posts").upsert({author:a,id:"hack",data:{name:"x"}},{onConflict:"author,id"})).error,A.me));
     // B likes + comments, A is notified
