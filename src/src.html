@@ -194,23 +194,23 @@ body.authing{overflow:hidden}
 /* H: weekend pick rail (scroll-snap) */
 .pickrail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-16px;padding:6px 16px 10px;scroll-padding-inline:16px}
 .pickrail::-webkit-scrollbar{display:none}
-.pc{flex:none;width:min(46vw,180px);aspect-ratio:1/1;border-radius:22px;padding:16px;color:#fffcf5;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;scroll-snap-align:center;border:0;text-align:left;background:#5b6b8c;transition:transform .3s,box-shadow .3s}
+.pc{flex:none;width:min(40vw,150px);aspect-ratio:1/1;border-radius:20px;padding:12px;color:#fffcf5;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;scroll-snap-align:center;border:0;text-align:left;background:#5b6b8c;transition:transform .3s,box-shadow .3s}
 .pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .pc.has-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.65))}
-.pc .k{position:absolute;top:10%;left:0;right:0;text-align:center;font:900 56px/1 var(--f-display);opacity:.9}
+.pc .k{position:absolute;top:10%;left:0;right:0;text-align:center;font:900 46px/1 var(--f-display);opacity:.9}
 .pc b,.pc small{position:relative;z-index:1}
-.pc b{font-family:var(--f-display);font-weight:900;font-size:17px;line-height:1.3}
+.pc b{font-family:var(--f-display);font-weight:900;font-size:15px;line-height:1.3}
 .pc small{font-size:12px;opacity:.9}
 .pc.on{outline:3px solid var(--noren);outline-offset:3px}
 .dots{display:flex;gap:6px;justify-content:center}
 .dots i{width:7px;height:7px;border-radius:9px;background:var(--line);transition:width .25s,background .25s}
 .dots i.on{width:22px;background:var(--noren)}
-.pickbar{padding:12px 12px 12px 18px;border-radius:18px;background:var(--noren);color:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700}
+.pickbar{padding:6px 6px 6px 18px;border-radius:18px;background:var(--noren);color:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700}
 .pickbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .pickbar a,.pickbar button{flex:none;border:0;background:var(--yolk);color:var(--yolk-ink);border-radius:99px;padding:0 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:700;font-size:13px;text-decoration:none}
 /* I: genre revolver + liquid glass */
-.ring{position:relative;height:146px;perspective:900px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px;border-radius:22px}
-.ring button{position:absolute;left:50%;top:8px;width:92px;height:120px;margin-left:-46px;border:0;border-radius:20px;font:700 46px/1 var(--f-body);color:#fffcf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 24px rgba(67,56,44,.16);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.ring{position:relative;height:136px;perspective:900px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px;border-radius:22px}
+.ring button{position:absolute;left:50%;top:6px;width:88px;height:112px;margin-left:-44px;border:0;border-radius:20px;font:700 46px/1 var(--f-body);color:#fffcf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 24px rgba(67,56,44,.16);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
 .ring button small{font-size:13px;font-weight:700;opacity:.95}
 .ring .gi{width:54px;height:54px;overflow:visible}
 .gi .b{fill:#fffcf5}.gi .a{fill:var(--acc)}.gi .l{fill:none;stroke:#fffcf5;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.gi .l.thin{stroke-width:2}
@@ -297,7 +297,7 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
     <div><h2 style="font-size:24px">今週末どこ行く？</h2><p class="sub">相互フォローの友だちのおすすめから1軒えらぼう</p></div>
     <div class="stories" id="stories" aria-label="友だちの新しい投稿" hidden></div>
     <div id="feedNotice"></div>
-    <div id="pickBox" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div id="pickBox" hidden style="display:flex;flex-direction:column;gap:8px">
       <div class="pickrail" id="pickRail" aria-label="おすすめのお店"></div>
       <div class="dots" id="pickDots" aria-hidden="true" hidden></div>
       <div class="pickbar"><span id="pickName"></span><a id="pickGo" target="_blank" rel="noopener">ここに決めた</a></div>
