@@ -522,7 +522,7 @@ function makeSbDb(sb, me){
     chan.subscribe((st,err)=>{rt.status=st+(err?" "+(err.message||err):"");seen("status:"+rt.status)});timer=setInterval(()=>{if(document.visibilityState==="visible")kick()},90000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")kick()})}
   function listen(r,opt,cb,err){const l={tables:TABLES[r.t]||[],busy:false,again:false,t:0,dead:false};
-    const run=async()=>{if(l.dead)return;if(l.busy){l.again=true;return}l.busy=true;try{const s=await readColl(r,opt);if(!l.dead)cb(s)}catch(e){err&&err(e)}l.busy=false;if(l.again){l.again=false;run()}};
+    const run=async()=>{if(l.dead)return;if(l.busy){l.again=true;return}l.busy=true;const rt=window.HP_RT;try{const s=await readColl(r,opt);if(rt&&rt.log.length<60)rt.log.push([Date.now(),"read:"+r.t+":"+s.docs.length]);if(!l.dead)cb(s)}catch(e){if(rt&&rt.log.length<60)rt.log.push([Date.now(),"err:"+r.t+":"+(e&&e.message)]);err&&err(e)}l.busy=false;if(l.again){l.again=false;run()}};
     l.refresh=()=>{clearTimeout(l.t);l.t=setTimeout(run,250)};l.r=r;live.add(l);ensureChannel();run();
     return()=>{l.dead=true;clearTimeout(l.t);live.delete(l)}}
 

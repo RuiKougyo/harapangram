@@ -34,6 +34,7 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     const p=A.p;await p.evaluate(()=>go("post"));await W(500);
     await p.setInputFiles("#pPhoto",[{name:"a.jpg",mimeType:"image/jpeg",buffer:await jpeg(p,20)},{name:"b.jpg",mimeType:"image/jpeg",buffer:await jpeg(p,200)}]);await W(2500);
     await p.fill("#pName","テスト食堂"+R);await p.selectOption("#pPref","13");await p.fill("#pHours","11:00〜15:00");out.postAt=Date.now();await p.click("#pSubmit");await W(6000);
+    out.bDirect=await B.p.evaluate(async a=>(await S.sb.from("posts").select("id").eq("author",a)).data.length,A.me);
     const post=await p.evaluate(async()=>{const s=await S.sb.from("posts").select("id,data").eq("author",S.me);return s.data[0]});
     ok("posted",!!post&&post.data.pics===1&&/^sb:/.test(post.data.photo));
     // B sees it with photos
