@@ -40,6 +40,7 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     await B.p.evaluate(()=>go("feed"));
     // how fast does the friend's new post arrive without reloading? (realtime; the 90s poll is the fallback)
     {const t0=Date.now();let seen=false;for(let i=0;i<55&&!seen;i++){seen=await B.p.evaluate(n=>visiblePosts().some(x=>x.name===n),"テスト食堂"+R);if(!seen)await W(2000)}
+     out.rtB=await B.p.evaluate(()=>window.HP_RT);out.rtA=await A.p.evaluate(()=>window.HP_RT);
      out.bSeesNewPostSec=seen?Math.round((Date.now()-t0)/1000):null;ok("bSeesPostLive",seen)}
     if(!out.bSeesNewPostSec){await B.p.reload();await B.p.waitForFunction(()=>typeof S!=="undefined"&&S.me&&S.ready,null,{timeout:30000});await W(4000);await B.p.evaluate(()=>go("feed"));await W(1500)}
     const art=B.p.locator("article",{hasText:"テスト食堂"+R}).first();

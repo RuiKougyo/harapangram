@@ -88,10 +88,12 @@ function makeSbDb(sb, me){
   function ring(){try{if(chan)chan.send({type:"broadcast",event:"posts",payload:{}})}catch(e){}}
   function kick(tables){for(const l of live)if(!tables||l.tables.some(t=>tables.includes(t)))l.refresh()}
   function ensureChannel(){if(chan)return;chan=sb.channel("hp-live");
-    for(const t of ["profiles","follow_edges","follow_meta","posts","reacts","user_data"])chan.on("postgres_changes",{event:"*",schema:"public",table:t},()=>kick([t]));
+    // HP_RT counts what arrives, so a test (or the console) can tell whether live updates work
+    const rt=window.HP_RT={status:null,events:{}};const seen=t=>{rt.events[t]=(rt.events[t]||0)+1};
+    for(const t of ["profiles","follow_edges","follow_meta","posts","reacts","user_data"])chan.on("postgres_changes",{event:"*",schema:"public",table:t},()=>{seen(t);kick([t])});
     // a new post also rings an empty broadcast so friends refetch at once (no content is sent; what they can read is still decided by RLS)
-    chan.on("broadcast",{event:"posts"},()=>kick(["posts"]));
-    chan.subscribe();timer=setInterval(()=>{if(document.visibilityState==="visible")kick()},90000);
+    chan.on("broadcast",{event:"posts"},()=>{seen("broadcast");kick(["posts"])});
+    chan.subscribe((st,err)=>{rt.status=st+(err?" "+(err.message||err):"")});timer=setInterval(()=>{if(document.visibilityState==="visible")kick()},90000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")kick()})}
   function listen(r,opt,cb,err){const l={tables:TABLES[r.t]||[],busy:false,again:false,t:0,dead:false};
     const run=async()=>{if(l.dead)return;if(l.busy){l.again=true;return}l.busy=true;try{const s=await readColl(r,opt);if(!l.dead)cb(s)}catch(e){err&&err(e)}l.busy=false;if(l.again){l.again=false;run()}};
