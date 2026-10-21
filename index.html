@@ -1357,7 +1357,9 @@ async function boot(){
   try{const inv=new URLSearchParams(location.search).get("invite");if(inv){sessionStorage.setItem("hp_invite",inv.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8));history.replaceState(null,"",APP_URL)}}catch(e){}
   const cfg=window.HP_CONFIG||{};
   if(!cfg.url||!cfg.anonKey||!window.supabase){S.offline=true;S.ready=true;renderAll();showAuth("setup");return}
-  const sb=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});S.sb=sb;
+  const sb=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true},
+    // never answer a read from the browser's HTTP cache: the live test saw friends' new posts stay hidden for about 60s
+    global:{fetch:(u,o)=>fetch(u,{...(o||{}),cache:"no-store"})}});S.sb=sb;
   sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")location.reload()});
   let session=null;try{session=(await sb.auth.getSession()).data.session}catch(e){}
   if(!session){S.offline=true;S.ready=true;renderAll();showAuth("login");return}
