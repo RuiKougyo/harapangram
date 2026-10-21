@@ -8,14 +8,16 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
   // wait until GitHub Pages serves this commit
   for(let i=0;i<40;i++){const t=await fetch(BASE+"?v="+Date.now()).then(r=>r.text()).catch(()=>"");if(t.includes(process.env.MARKER||"osmBtn"))break;await W(15000)}
   const b=await chromium.launch();const users=[];
-  async function signup(nick,id){const ctx=await b.newContext({viewport:{width:390,height:844}});const p=await ctx.newPage();const errs=[];
+  async function signup(nick,id){const ctx=await b.newContext({viewport:{width:390,height:844},bypassCSP:true});// Playwright's waitForFunction needs eval, which the page CSP blocks
+    const p=await ctx.newPage();const errs=[];
     p.on("pageerror",e=>errs.push(e.message));p.on("console",m=>{if(m.type()==="error"&&!/Failed to load resource/.test(m.text()))errs.push(m.text())});
     await p.goto(BASE);await p.waitForSelector("#auth:not([hidden])",{timeout:30000});await p.click("text=はじめての人はこちら");
     await p.fill("#auth input[autocomplete=nickname]",nick);await p.fill("#auth input[autocomplete=username]",id);
     await p.fill("#auth input[type=password] >> nth=0",PW);await p.fill("#auth input[type=password] >> nth=1",PW);
     await p.fill("#auth input[placeholder^='例：はじめて']",PH);await p.check("#auth .agree input");await p.click("#auth button[type=submit]");
+    const u={p,ctx,errs,id,nick};users.push(u);console.log("test account",id);
     await p.waitForFunction(()=>typeof S!=="undefined"&&S.me&&S.ready,null,{timeout:30000});await W(1500);
-    const me=await p.evaluate(()=>S.me);const u={p,ctx,errs,id,me,nick};users.push(u);return u}
+    u.me=await p.evaluate(()=>S.me);return u}
   const jpeg=async(p,hue)=>Buffer.from(await p.evaluate(h=>{const c=document.createElement("canvas");c.width=1200;c.height=900;const x=c.getContext("2d");
     x.fillStyle=`hsl(${h},60%,60%)`;x.fillRect(0,0,1200,900);x.fillStyle="#fff";x.font="bold 160px sans-serif";x.fillText("TEST",380,500);return c.toDataURL("image/jpeg",.9).split(",")[1]},hue),"base64");
   try{
