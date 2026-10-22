@@ -736,7 +736,7 @@ function photoEl(p,cls="photo"){if(p.photo){if(cls==="photo"){const a=photoAttrs
 function postCard(p){
   const mine=p.author===S.me&&!p.sample;
   return el("article",{class:"card post"},
-    el("div",{class:"head"},el("button",{type:"button",style:"background:none;border:0;padding:0;border-radius:50%;min-width:44px;min-height:44px;display:grid;place-items:center","aria-label":nick(p.author)+"の投稿をまとめて見る",onclick:()=>openViewer(0,p.id)},avatar(p.author)),el("div",{class:"who"},p.sample?el("b",{text:nick(p.author)}):el("button",{type:"button",class:"namebtn",onclick:()=>openFriendProfile(p.author)},el("b",{text:mine?nick(p.author)+"（自分）":nick(p.author)})),el("small",{text:ago(p.createdAt)+(p.updatedAt?"・編集済み":"")})),p.sample?el("span",{class:"sample-flag",style:"margin-left:auto",text:"サンプル"}):null),
+    el("div",{class:"head"},(p.sample?el("button",{type:"button",class:"profbtn","aria-label":nick(p.author)+"の投稿をまとめて見る",onclick:()=>openViewer(0,p.id)},avatar(p.author)):profBtn(p.author,avatar(p.author))),el("div",{class:"who"},p.sample?el("b",{text:nick(p.author)}):el("button",{type:"button",class:"namebtn",onclick:()=>openFriendProfile(p.author)},el("b",{text:mine?nick(p.author)+"（自分）":nick(p.author)})),el("small",{text:ago(p.createdAt)+(p.updatedAt?"・編集済み":"")})),p.sample?el("span",{class:"sample-flag",style:"margin-left:auto",text:"サンプル"}):null),
     gallery(p),
     el("div",{class:"body"},
       el("h3",{class:"shop",text:p.name}),
@@ -864,7 +864,7 @@ function renderViewer(anim){if(!V.open)return;const v=$("#viewer");
   markSeen(p);const prog=el("div",{class:"prog","aria-hidden":"true"});pp.posts.forEach((_,i)=>prog.append(el("i",{class:i<=V.k?"on":""})));
   const body=el("div",{class:"vbody"+(anim?" vswap":"")},postCard(p));
   const sheet=el("div",{class:"sheetv"},el("div",{class:"vbar"},el("button",{type:"button","aria-label":"前の投稿",onclick:()=>stepViewer(-1),text:"‹"}),prog,
-    el("small",{class:"sub",text:`${pp.id===S.me&&!S.sample?"自分":nick(pp.id)} ${V.k+1}/${pp.posts.length}`}),
+    (S.sample?el("small",{class:"sub",text:`${nick(pp.id)} ${V.k+1}/${pp.posts.length}`}):el("button",{type:"button",class:"namebtn sub",style:"font-size:13px;min-height:44px;color:var(--muted)","aria-label":(pp.id===S.me?"マイページ":nick(pp.id)+"さんのプロフィール")+"を開く",onclick:()=>openFriendProfile(pp.id),text:`${pp.id===S.me?"自分":nick(pp.id)} ${V.k+1}/${pp.posts.length}`})),
     el("button",{type:"button","aria-label":"次の投稿",onclick:()=>stepViewer(1),text:"›"}),el("button",{type:"button",class:"vclose","aria-label":"閉じる",onclick:closeViewer,text:"×"})),body);
   const top=v.querySelector(".sheetv");const keep=top?top.scrollTop:0;v.textContent="";v.append(sheet);if(!anim)sheet.scrollTop=keep}
 $("#viewer").addEventListener("click",e=>{if(e.target.id==="viewer")closeViewer()});
@@ -1083,7 +1083,7 @@ async function claimName(n,oldNick){
   return true}
 // ---------- someone's profile + their follow / follower lists ----------
 const FP={id:null,tab:null,lists:null,err:false};
-async function openFriendProfile(id){if(!id||S.sample)return;if(id===S.me){$("#modal").hidden=true;FP.id=null;go("mine");return}
+async function openFriendProfile(id){if(!id||S.sample)return;if(id===S.me){if(V.open)closeViewer();$("#modal").hidden=true;FP.id=null;go("mine");return}
   if(V.open)closeViewer();FP.id=id;FP.tab=null;FP.lists=null;FP.err=false;renderFriendProfile();$("#modal").hidden=false;
   const mutual=iFollow(id)&&followsMe(id);if(!mutual||S.offline)return;
   try{const {data,error}=await S.sb.rpc("friend_lists",{p_uid:id});if(error)throw error;if(FP.id!==id)return;
