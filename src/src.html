@@ -100,7 +100,8 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 
 /* map */
 .mapbox{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
-.mapbox svg{display:block;width:100%;height:auto;touch-action:manipulation}
+/* inside the map box fingers pan and pinch the map; outside it the page scrolls as usual */
+.mapbox svg{display:block;width:100%;height:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.mapbox svg.dragging{cursor:grabbing}
 .muni{fill:var(--map-0);stroke:var(--surface);stroke-width:.3px;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .2s}
 .muni:hover{filter:brightness(.94)}
 .muni.dim{opacity:.35}
@@ -325,7 +326,7 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
   </section>
 
   <section data-view="map" id="v-map" hidden>
-    <div><h2>腹ぱんマップ</h2><p class="sub">相互フォローの友だちと自分が行った場所を市区町村ごとに色分け。タップで県にズーム、もう一度タップで市区町村をえらべるよ</p></div>
+    <div><h2>腹ぱんマップ</h2><p class="sub">相互フォローの友だちと自分が行った場所を市区町村ごとに色分け。タップで県にズーム、もう一度タップで市区町村をえらべるよ。地図の中は指でずらしたり、2本指で広げて拡大もできるよ</p></div>
     <div class="arrow" id="mapWho" role="group" aria-label="地図に出す人"><button type="button" data-who="all" aria-pressed="true">みんな</button><button type="button" data-who="me" aria-pressed="false">自分だけ</button></div>
     <div class="stats" id="mapStats"></div>
     <div class="mapbox">
@@ -544,6 +545,28 @@ $("#rankSpan").addEventListener("click",e=>{const b=e.target.closest("button");i
 $("#mapWho").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.mapWho=b.dataset.who;renderMap()});
 function onBigMapClick(ev){const t=ev.target.closest&&ev.target.closest(".muni");if(!t)return;const pref=t.dataset.pref,code=t.dataset.code;
   if(S.mapPref!==pref){S.mapPref=pref;S.mapCity=null;zoomTo(pref)}else{S.mapCity=S.mapCity===code?null:code}renderMap()}
+// pan with one finger (or the mouse), pinch with two, wheel on a computer; a drag never counts as a tap on a city
+{const svg=$("#bigMap");const pts=new Map();let last=null,moved=0,endT=0;
+  const clampVB=vb=>{const w=Math.min(FULL.w,Math.max(FULL.w/60,vb.w)),h=w*FULL.h/FULL.w;const cx=vb.x+vb.w/2,cy=vb.y+vb.h/2;
+    const x=Math.min(FULL.x+FULL.w-w*.25,Math.max(FULL.x-w*.75,cx-w/2)),y=Math.min(FULL.y+FULL.h-h*.25,Math.max(FULL.y-h*.75,cy-h/2));return{x,y,w,h}};
+  const toSvg=(px,py)=>{const r=svg.getBoundingClientRect();return{x:curVB.x+(px-r.left)/r.width*curVB.w,y:curVB.y+(py-r.top)/r.height*curVB.h}};
+  const zoomAt=(px,py,k)=>{const a=toSvg(px,py);const w=curVB.w*k,h=curVB.h*k;const r=svg.getBoundingClientRect();
+    setVB(svg,clampVB({x:a.x-(px-r.left)/r.width*w,y:a.y-(py-r.top)/r.height*h,w,h}))};
+  const state=()=>{const v=[...pts.values()];if(v.length>=2){const[a,b]=v;return{x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:Math.hypot(a.x-b.x,a.y-b.y)}}return v[0]?{x:v[0].x,y:v[0].y,d:0}:null};
+  let redraw=0;const settle=()=>{clearTimeout(redraw);redraw=setTimeout(()=>{if(!pts.size)renderMap()},120)};
+  svg.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1)moved=0;last=state()});
+  svg.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const now=state();if(!last||!now)return;
+    const dx=now.x-last.x,dy=now.y-last.y;moved+=Math.abs(dx)+Math.abs(dy);if(moved<6&&pts.size<2)return;
+    if(!svg.hasPointerCapture(e.pointerId))try{svg.setPointerCapture(e.pointerId)}catch(_){}
+    svg.classList.add("dragging");const r=svg.getBoundingClientRect();
+    if(pts.size>=2&&last.d&&now.d){moved+=99;zoomAt(now.x,now.y,last.d/now.d)}
+    setVB(svg,clampVB({...curVB,x:curVB.x-dx/r.width*curVB.w,y:curVB.y-dy/r.height*curVB.h}));last=now});
+  const up=e=>{if(!pts.delete(e.pointerId))return;last=state();if(!pts.size){svg.classList.remove("dragging");if(moved>=6){endT=Date.now();settle()}}};
+  svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
+  svg.addEventListener("click",e=>{if(Date.now()-endT<350||moved>=6){e.stopImmediatePropagation();e.preventDefault()}},true);
+  svg.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(e.deltaY*.0015));settle()},{passive:false});
+  // Safari sends its own pinch events; the pointer code above already handles the pinch
+  svg.addEventListener("gesturestart",e=>e.preventDefault())}
 // Google Maps: links only (the page cannot call Google). Coordinates are read from a pasted full link when present.
 function safeGmap(u){try{const x=new URL(u.trim());if(x.protocol!=="https:")return null;const h=x.hostname;if(/(^|\.)google\.(com|co\.jp|jp)$/.test(h)&&(x.pathname.startsWith("/maps")||h.startsWith("maps.")))return x.href;if(h==="maps.app.goo.gl"||h==="goo.gl")return x.href;return null}catch(e){return null}}
 function gmapCoords(u){let t=u;try{t=decodeURIComponent(u)}catch(e){}const pats=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|center|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/];
