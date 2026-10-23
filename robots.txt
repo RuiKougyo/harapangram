@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://ruikougyo.github.io/harapangram/sitemap.xml
