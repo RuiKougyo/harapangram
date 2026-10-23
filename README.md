@@ -95,4 +95,5 @@
 - `tests/live-e2e.js` / `.github/workflows/live-test.yml` … 本番テスト
 - `.github/workflows/keepalive.yml` … 休止防止
 - 地図データ：jpn-atlas（BSD-3）、市区町村名：jp-local-gov（MIT）
-- お店の場所・営業時間の検索：OpenStreetMap / Nominatim（ボタンを押したときだけ、1秒に1回まで）
+- 店名の入力候補：Photon（komoot、OpenStreetMap データ。入力が止まって0.35秒後に1回）
+- お店の場所・営業時間の検索：OpenStreetMap / Nominatim（候補を選んだときかボタンを押したときだけ、1秒に1回まで）

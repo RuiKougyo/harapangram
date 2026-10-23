@@ -1043,20 +1043,46 @@ function openProfile(){
   function shopCandidates(q){const nq=normName(q);if(nq.length<1)return[];const seen=new Map();
     for(const p of visiblePosts()){const n=normName(p.name);if(!n.includes(nq))continue;const key=n+"|"+(p.city||p.pref);if(!seen.has(key))seen.set(key,{p,count:0,starts:n.startsWith(nq)});seen.get(key).count++}
     return[...seen.values()].sort((a,b)=>(b.starts-a.starts)||(b.count-a.count)).slice(0,5)}
-  function renderSugg(){const list=shopCandidates($("#pName").value.trim());suggBox.textContent="";if(!list.length){suggBox.hidden=true;return}
-    suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
-    for(const{p,count}of list)suggBox.append(el("button",{type:"button",onclick:()=>useShop(p)},photoEl(p,"thumb"),el("span",{},el("b",{text:p.name}),el("small",{text:placeLabel(p)+(count>1?`・${count}人が投稿`:"")}))));
-    suggBox.hidden=false}
+  // as-you-type shop suggestions: friends' posts first, then OpenStreetMap places from Photon (an autocomplete service; Nominatim's policy forbids autocomplete)
+  const PH={q:"",hits:[],busy:false,ctl:null,timer:0,cache:new Map()};
+  const FOOD_TAGS=["amenity:restaurant","amenity:cafe","amenity:fast_food","amenity:bar","amenity:pub","amenity:food_court","amenity:ice_cream","shop:bakery","shop:confectionery","shop:pastry","shop:deli"];
+  const phAddr=q=>[q.state,q.city,q.district,q.locality,q.street,q.housenumber].filter((x,i,a)=>x&&a.indexOf(x)===i).join("");
+  function photonSearch(q){clearTimeout(PH.timer);if(PH.ctl)PH.ctl.abort();PH.q=q;
+    if(normName(q).length<2){PH.hits=[];PH.busy=false;return}
+    if(PH.cache.has(q)){PH.hits=PH.cache.get(q);PH.busy=false;return}
+    PH.busy=true;PH.hits=[];
+    PH.timer=setTimeout(async()=>{const ctl=PH.ctl=new AbortController();
+      const u=new URLSearchParams({q,limit:"20",lang:"default",bbox:"122,24,154,46"});
+      try{const r=await fetch("https://photon.komoot.io/api/?"+u,{signal:ctl.signal});if(!r.ok)throw new Error(r.status);const j=await r.json();
+        const hits=(j.features||[]).filter(f=>f&&f.geometry&&f.properties&&f.properties.name&&f.properties.countrycode==="JP"&&FOOD_TAGS.includes(f.properties.osm_key+":"+f.properties.osm_value)).slice(0,5).map(f=>({name:f.properties.name,lon:+f.geometry.coordinates[0],lat:+f.geometry.coordinates[1],addr:phAddr(f.properties),osm:(f.properties.osm_type||"")+(f.properties.osm_id||"")}));
+        PH.cache.set(q,hits);if(PH.q===q){PH.hits=hits;PH.busy=false;renderSugg(true)}}
+      catch(e){if(e.name!=="AbortError"&&PH.q===q){PH.busy=false;PH.hits=[];renderSugg(true)}}},350)}
+  function renderSugg(keep){const q=$("#pName").value.trim();if(!keep)photonSearch(q);const list=shopCandidates(q);suggBox.textContent="";
+    if(list.length){suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
+      for(const{p,count}of list)suggBox.append(el("button",{type:"button",onclick:()=>useShop(p)},photoEl(p,"thumb"),el("span",{},el("b",{text:p.name}),el("small",{text:placeLabel(p)+(count>1?`・${count}人が投稿`:"")}))))}
+    const known=new Set(list.map(x=>normName(x.p.name)));const hits=PH.q===q?PH.hits.filter(h=>!(known.has(normName(h.name))&&!h.addr)):[];
+    if(hits.length||(PH.busy&&PH.q===q&&normName(q).length>=2)){suggBox.append(el("div",{class:"cap",text:PH.busy?"お店をさがしています…":"お店の候補（タップで場所を入れる）"}));
+      for(const h of hits)suggBox.append(el("button",{type:"button",onclick:()=>usePhoton(h)},el("span",{class:"pin-ic","aria-hidden":"true",text:"📍"}),el("span",{},el("b",{text:h.name}),el("small",{text:h.addr||"住所なし"}))));
+      if(hits.length)suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 6px;margin:0;font-size:11px"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"))}
+    suggBox.hidden=!suggBox.children.length}
+  // picking a place: one Nominatim lookup by its OSM id for the full address and opening hours, else the Photon data alone
+  async function usePhoton(h){suggBox.hidden=true;$("#pName").value=h.name;PH.q="";
+    const fallback={lat:h.lat,lon:h.lon,name:h.name,display_name:[h.name,...h.addr?[h.addr]:[]].join(", ")};
+    const id=/^([NWR])(\d+)$/.exec(h.osm);if(!id){useOsm(fallback,h.name);return}
+    const wait=1100-(Date.now()-osmLast);if(wait>0)await new Promise(r=>setTimeout(r,wait));osmLast=Date.now();
+    try{const r=await fetch("https://nominatim.openstreetmap.org/lookup?"+new URLSearchParams({osm_ids:id[1]+id[2],format:"jsonv2",addressdetails:"1",extratags:"1","accept-language":"ja"}));
+      const j=r.ok?await r.json():[];const d=j&&j[0];useOsm(d&&isFinite(+d.lat)?{...d,name:h.name}:fallback,h.name)}catch(e){useOsm(fallback,h.name)}}
   function useShop(p){$("#pName").value=p.name;sel.value=p.pref;S.form.city=p.city||null;S.form.x=p.x??null;S.form.y=p.y??null;showPref(p.pref,true);
     if(p.addr){addrIn.value=p.addr}if(p.gmap&&safeGmap(p.gmap)){gmIn.value=p.gmap}suggBox.hidden=true;updateGm();
     addrHint.hidden=false;addrHint.className="hint ok";addrHint.textContent="場所を入れたよ："+placeLabel(p)}
-  $("#pName").addEventListener("input",()=>{updateGm();renderSugg()});
+  $("#pName").addEventListener("input",e=>{updateGm();if(e.isComposing){renderSugg(true);return}renderSugg()});
+  $("#pName").addEventListener("compositionend",()=>renderSugg());
   window.prefillPost=p=>{resetForm();go("post");useShop(p);$("#pName").scrollIntoView({block:"center"})};
   // shop lookup in OpenStreetMap (Nominatim): one request per button press, at most 1 per second, as its usage policy asks
   const OSM_DAYS={Mo:"月",Tu:"火",We:"水",Th:"木",Fr:"金",Sa:"土",Su:"日",PH:"祝"};
   const osmHours=t=>String(t||"").replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g,d=>OSM_DAYS[d]).replace(/\boff\b/g,"休み").replace(/\s*;\s*/g,"、").replace(/-/g,"〜").slice(0,80);
   const osmAddr=h=>String(h.display_name||"").split(",").map(x=>x.trim()).slice(1).filter(x=>x&&x!=="日本"&&!/^\d{3}-?\d{4}$/.test(x)).reverse().join("");
-  let osmLast=0;
+  var osmLast=0;
   function useOsm(h,n){const lat=+h.lat,lon=+h.lon,pt=project(lat,lon),m=muniAt(pt.x,pt.y);
     if(!$("#pName").value.trim())$("#pName").value=h.name||n;const a=osmAddr(h);if(a)addrIn.value=a;
     if(m){sel.value=m.pref;S.form.city=m.code;showPref(m.pref,true);setPoint(pt.x,pt.y)}
@@ -1074,7 +1100,7 @@ function openProfile(){
     catch(e){toast("いまはさがせなかった。少し待ってためしてね")}
     finally{btn.disabled=false;btn.textContent="店名から場所と営業時間をさがす"}};
   $("#pName").addEventListener("blur",()=>setTimeout(()=>{if(!suggBox.contains(document.activeElement))suggBox.hidden=true},150));
-  $("#pName").addEventListener("focus",renderSugg);
+  $("#pName").addEventListener("focus",()=>renderSugg());
   addrIn.addEventListener("input",()=>{const r=parseAddress(addrIn.value);addrHint.hidden=!addrIn.value.trim();addrHint.className="hint";
     if(!r){addrHint.textContent="市区町村が見つからなかった。都道府県から入れてみてね";return}
     sel.value=r.pref;S.form.city=r.city;S.form.x=S.form.y=null;showPref(r.pref,true);updateGm();
