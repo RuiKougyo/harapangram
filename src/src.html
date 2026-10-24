@@ -117,6 +117,7 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .sugg button:first-child{border-top:0}
 .sugg button:hover,.sugg button:focus-visible{background:var(--bg)}
 .sugg b{font-weight:700;display:block}
+.sugg .pinrow{background:var(--bg)}.sugg .pinrow b{color:var(--stamp)}
 .sugg small{color:var(--muted);font-size:12px}
 .sugg .cap{font-size:11px;color:var(--muted);padding:6px 10px 0;font-weight:700}
 .addr{color:var(--muted);font-size:12px;margin:0}
@@ -183,7 +184,7 @@ textarea{min-height:90px;resize:vertical}
 .rate svg{width:34px;height:34px}
 .drop{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);cursor:pointer;display:block}
 .drop img{max-height:220px;margin:0 auto;border-radius:8px}
-.mini svg{display:block;width:100%;height:auto;max-height:280px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:crosshair}
+.mini svg{display:block;width:100%;height:auto;max-height:280px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none}.mini.flash svg{outline:3px solid var(--yolk,#f3c64b);outline-offset:2px}
 .err{color:var(--stamp);font-size:13px;margin:0}
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--noren);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
@@ -357,8 +358,8 @@ section[data-view].enter{animation:popIn .16s cubic-bezier(.2,.8,.2,1)}
       <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">ジャンル<div class="choices" id="pGenre"></div></div>
       <label class="f">都道府県<select id="pPref" required><option value="">えらんでね</option></select></label>
       <label class="f" id="cityWrap" hidden>市区町村<select id="pCity"><option value="">えらんでね</option></select></label>
-      <div class="mini" id="miniWrap" hidden>
-        <p class="sub" style="margin-bottom:6px">地図をタップするとお店の場所にピンが立って、市区町村も自動で入るよ</p>
+      <div class="mini" id="miniWrap">
+        <p class="sub" style="margin-bottom:6px">地図をタップするとお店の場所にピンが立って、都道府県と市区町村も自動で入るよ。2本指で広げると拡大、1本指で動かせるよ</p>
         <svg id="miniMap" viewBox="0 0 10 10" role="img" aria-label="ピンを立てる地図"></svg>
       </div>
       <div class="f" style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">満足度<div class="rate" id="pRate"></div></div>
@@ -546,27 +547,28 @@ $("#mapWho").addEventListener("click",e=>{const b=e.target.closest("button");if(
 function onBigMapClick(ev){const t=ev.target.closest&&ev.target.closest(".muni");if(!t)return;const pref=t.dataset.pref,code=t.dataset.code;
   if(S.mapPref!==pref){S.mapPref=pref;S.mapCity=null;zoomTo(pref)}else{S.mapCity=S.mapCity===code?null:code}renderMap()}
 // pan with one finger (or the mouse), pinch with two, wheel on a computer; a drag never counts as a tap on a city
-{const svg=$("#bigMap");const pts=new Map();let last=null,moved=0,endT=0;
-  const clampVB=vb=>{const w=Math.min(FULL.w,Math.max(FULL.w/60,vb.w)),h=w*FULL.h/FULL.w;const cx=vb.x+vb.w/2,cy=vb.y+vb.h/2;
+function mapGestures(svg,getVB,putVB,onSettle){const pts=new Map();let last=null,moved=0,endT=0;
+  const clampVB=vb=>{const w=Math.min(FULL.w,Math.max(FULL.w/60,vb.w)),h=w*vb.h/vb.w;const cx=vb.x+vb.w/2,cy=vb.y+vb.h/2;
     const x=Math.min(FULL.x+FULL.w-w*.25,Math.max(FULL.x-w*.75,cx-w/2)),y=Math.min(FULL.y+FULL.h-h*.25,Math.max(FULL.y-h*.75,cy-h/2));return{x,y,w,h}};
-  const toSvg=(px,py)=>{const r=svg.getBoundingClientRect();return{x:curVB.x+(px-r.left)/r.width*curVB.w,y:curVB.y+(py-r.top)/r.height*curVB.h}};
-  const zoomAt=(px,py,k)=>{const a=toSvg(px,py);const w=curVB.w*k,h=curVB.h*k;const r=svg.getBoundingClientRect();
-    setVB(svg,clampVB({x:a.x-(px-r.left)/r.width*w,y:a.y-(py-r.top)/r.height*h,w,h}))};
+  const toSvg=(px,py)=>{const r=svg.getBoundingClientRect(),curVB=getVB();return{x:curVB.x+(px-r.left)/r.width*curVB.w,y:curVB.y+(py-r.top)/r.height*curVB.h}};
+  const zoomAt=(px,py,k)=>{const a=toSvg(px,py),curVB=getVB();const w=curVB.w*k,h=curVB.h*k;const r=svg.getBoundingClientRect();
+    putVB(clampVB({x:a.x-(px-r.left)/r.width*w,y:a.y-(py-r.top)/r.height*h,w,h}))};
   const state=()=>{const v=[...pts.values()];if(v.length>=2){const[a,b]=v;return{x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:Math.hypot(a.x-b.x,a.y-b.y)}}return v[0]?{x:v[0].x,y:v[0].y,d:0}:null};
-  let redraw=0;const settle=()=>{clearTimeout(redraw);redraw=setTimeout(()=>{if(!pts.size)renderMap()},120)};
+  let redraw=0;const settle=()=>{clearTimeout(redraw);redraw=setTimeout(()=>{if(!pts.size)onSettle()},120)};
   svg.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===1)moved=0;last=state()});
   svg.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const now=state();if(!last||!now)return;
     const dx=now.x-last.x,dy=now.y-last.y;moved+=Math.abs(dx)+Math.abs(dy);if(moved<6&&pts.size<2)return;
     if(!svg.hasPointerCapture(e.pointerId))try{svg.setPointerCapture(e.pointerId)}catch(_){}
     svg.classList.add("dragging");const r=svg.getBoundingClientRect();
     if(pts.size>=2&&last.d&&now.d){moved+=99;zoomAt(now.x,now.y,last.d/now.d)}
-    setVB(svg,clampVB({...curVB,x:curVB.x-dx/r.width*curVB.w,y:curVB.y-dy/r.height*curVB.h}));last=now});
+    const curVB=getVB();putVB(clampVB({...curVB,x:curVB.x-dx/r.width*curVB.w,y:curVB.y-dy/r.height*curVB.h}));last=now});
   const up=e=>{if(!pts.delete(e.pointerId))return;last=state();if(!pts.size){svg.classList.remove("dragging");if(moved>=6){endT=Date.now();settle()}}};
   svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
   svg.addEventListener("click",e=>{if(Date.now()-endT<350||moved>=6){e.stopImmediatePropagation();e.preventDefault()}},true);
   svg.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(e.deltaY*.0015));settle()},{passive:false});
   // Safari sends its own pinch events; the pointer code above already handles the pinch
   svg.addEventListener("gesturestart",e=>e.preventDefault())}
+mapGestures($("#bigMap"),()=>curVB,v=>setVB($("#bigMap"),v),()=>renderMap());
 // Google Maps: links only (the page cannot call Google). Coordinates are read from a pasted full link when present.
 function safeGmap(u){try{const x=new URL(u.trim());if(x.protocol!=="https:")return null;const h=x.hostname;if(/(^|\.)google\.(com|co\.jp|jp)$/.test(h)&&(x.pathname.startsWith("/maps")||h.startsWith("maps.")))return x.href;if(h==="maps.app.goo.gl"||h==="goo.gl")return x.href;return null}catch(e){return null}}
 function gmapCoords(u){let t=u;try{t=decodeURIComponent(u)}catch(e){}const pats=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|center|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/];
@@ -1029,24 +1031,32 @@ function openProfile(){
   const drawPin=()=>{pinG.textContent="";mini.querySelectorAll(".muni.sel").forEach(e=>e.classList.remove("sel"));if(S.form.city){const e=mini.querySelector(`[data-code="${S.form.city}"]`);if(e)e.classList.add("sel")}
     const pos=S.form.x!=null?{x:S.form.x,y:S.form.y}:(S.form.city&&MUNI[S.form.city]?MUNI[S.form.city].c:null);if(pos){const vb=mini.viewBox.baseVal;const r=vb.width/45;pinG.append(sv("circle",{cx:pos.x,cy:pos.y,r,fill:"var(--stamp)",stroke:"var(--surface)","stroke-width":"1.5px",class:"pin"}))}};
   const fillCities=pref=>{citySel.textContent="";citySel.append(el("option",{value:"",text:"えらんでね"}));(MUNIS_BY_PREF[pref]||[]).slice().sort((a,b)=>a.code.localeCompare(b.code)).forEach(m=>citySel.append(el("option",{value:m.code,text:m.name})))};
+  const miniVB=()=>{const b=mini.viewBox.baseVal;return{x:b.x,y:b.y,w:b.width,h:b.height}};
+  const putMini=vb=>mini.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  mapGestures(mini,miniVB,v=>{putMini(v);drawPin()},()=>{});
   const showPref=(pref,keep)=>{if(!keep){S.form.x=S.form.y=null;S.form.city=null}
-    $("#miniWrap").hidden=!pref;$("#cityWrap").hidden=!pref;if(!pref)return;fillCities(pref);citySel.value=S.form.city||"";
-    const b=prefBox(pref);const vb=fitBox(b,1.4,.06);mini.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    $("#cityWrap").hidden=!pref;if(!pref){putMini(fitBox(FULL,1.4,0));mini.querySelectorAll(".muni.dim").forEach(e=>e.classList.remove("dim"));drawPin();return}fillCities(pref);citySel.value=S.form.city||"";
+    const b=prefBox(pref);putMini(fitBox(b,1.4,.06));
     mini.querySelectorAll(".muni").forEach(e=>e.classList.toggle("dim",e.dataset.pref!==pref));drawPin();updateGm()};
   sel.onchange=()=>showPref(sel.value);
+  showPref("");
   citySel.onchange=()=>{S.form.city=citySel.value||null;S.form.x=S.form.y=null;drawPin();updateGm()};
   const setPoint=(x,y)=>{const m=muniAt(x,y);if(m){if(m.pref!==sel.value){sel.value=m.pref;S.form.city=m.code;showPref(m.pref,true)}S.form.city=m.code;citySel.value=m.code}S.form.x=+x.toFixed(2);S.form.y=+y.toFixed(2);drawPin();updateGm();return m};
   mini.addEventListener("click",ev=>{const pt=mini.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const m=mini.getScreenCTM();if(!m)return;const q=pt.matrixTransform(m.inverse());setPoint(q.x,q.y)});
   const gmIn=$("#pGmap"),gmA=$("#gmSearch"),gmHint=$("#gmHint");
   function updateGm(){const n=$("#pName").value.trim();const place=sel.value?(PREF_NAMES[+sel.value-1]+(S.form.city?" "+cityName(S.form.city):"")):"";gmA.href=n?gmapSearchUrl(n,place):"https://www.google.com/maps";$("#tbSearch").href=n?tabelogSearchUrl(n,place):"https://tabelog.com/";}
   const suggBox=$("#pSugg"),addrIn=$("#pAddr"),addrHint=$("#addrHint");
-  function shopCandidates(q){const nq=normName(q);if(nq.length<1)return[];const seen=new Map();
-    for(const p of visiblePosts()){const n=normName(p.name);if(!n.includes(nq))continue;const key=n+"|"+(p.city||p.pref);if(!seen.has(key))seen.set(key,{p,count:0,starts:n.startsWith(nq)});seen.get(key).count++}
+  // several words ("ココス 国領") = shop name plus a place: every word must be in the name or the place, and one of them in the name
+  const termsOf=q=>String(q||"").split(/[\s\u3000]+/).map(normName).filter(Boolean);
+  const termsMatch=(ts,name,place)=>{const n=normName(name),pl=normName(place);return ts.length>0&&ts.every(t=>n.includes(t)||pl.includes(t))&&ts.some(t=>n.includes(t))};
+  function shopCandidates(q){const ts=termsOf(q);if(!ts.length)return[];const seen=new Map();
+    for(const p of visiblePosts()){const n=normName(p.name);if(!termsMatch(ts,p.name,placeLabel(p)+(p.addr||"")))continue;const key=n+"|"+(p.city||p.pref);if(!seen.has(key))seen.set(key,{p,count:0,starts:n.startsWith(ts[0])});seen.get(key).count++}
     return[...seen.values()].sort((a,b)=>(b.starts-a.starts)||(b.count-a.count)).slice(0,5)}
   // as-you-type shop suggestions: friends' posts first, then OpenStreetMap places from Photon (an autocomplete service; Nominatim's policy forbids autocomplete)
   const PH={q:"",hits:[],busy:false,ctl:null,timer:0,cache:new Map()};
   const FOOD_TAGS=["amenity:restaurant","amenity:cafe","amenity:fast_food","amenity:bar","amenity:pub","amenity:food_court","amenity:ice_cream","shop:bakery","shop:confectionery","shop:pastry","shop:deli"];
   const phAddr=q=>[q.state,q.city,q.district,q.locality,q.street,q.housenumber].filter((x,i,a)=>x&&a.indexOf(x)===i).join("");
+  const phHits=j=>(j.features||[]).filter(f=>f&&f.geometry&&f.properties&&f.properties.name&&f.properties.countrycode==="JP"&&FOOD_TAGS.includes(f.properties.osm_key+":"+f.properties.osm_value)).map(f=>({name:f.properties.name,lon:+f.geometry.coordinates[0],lat:+f.geometry.coordinates[1],addr:phAddr(f.properties),osm:(f.properties.osm_type||"")+(f.properties.osm_id||"")}));
   function photonSearch(q){clearTimeout(PH.timer);if(PH.ctl)PH.ctl.abort();PH.q=q;
     if(normName(q).length<2){PH.hits=[];PH.busy=false;return}
     if(PH.cache.has(q)){PH.hits=PH.cache.get(q);PH.busy=false;return}
@@ -1055,27 +1065,49 @@ function openProfile(){
       const hp=await hpSearch(q);if(PH.q!==q||ctl.signal.aborted)return;
       const u=new URLSearchParams({q,limit:"20",lang:"default",bbox:"122,24,154,46"});
       try{const r=await fetch("https://photon.komoot.io/api/?"+u,{signal:ctl.signal});if(!r.ok)throw new Error(r.status);const j=await r.json();
-        const hits=(j.features||[]).filter(f=>f&&f.geometry&&f.properties&&f.properties.name&&f.properties.countrycode==="JP"&&FOOD_TAGS.includes(f.properties.osm_key+":"+f.properties.osm_value)).slice(0,5).map(f=>({name:f.properties.name,lon:+f.geometry.coordinates[0],lat:+f.geometry.coordinates[1],addr:phAddr(f.properties),osm:(f.properties.osm_type||"")+(f.properties.osm_id||"")}));
+        const hits=phHits(j).slice(0,5);
         const all=[...hp,...hits.filter(h=>!hp.some(x=>normName(x.name)===normName(h.name)))].slice(0,8);
         PH.cache.set(q,all);if(PH.q===q){PH.hits=all;PH.busy=false;renderSugg(true)}}
       catch(e){if(e.name!=="AbortError"&&PH.q===q){PH.busy=false;PH.hits=hp;renderSugg(true)}}},350)}
   // Hot Pepper Gourmet search through the "hotpepper" Supabase function; switched off for this visit if it is not deployed yet
   let hpOff=false;
-  async function hpSearch(q){if(hpOff||!S.sb||!S.me)return[];
-    try{const {data,error}=await S.sb.functions.invoke("hotpepper",{body:{q}});if(error)throw error;
-      const nq=normName(q);
-      // keyword search also matches addresses ("ココスクエア"), so keep only shops whose name or reading has what was typed
-      return (data&&data.shops||[]).filter(x=>x&&x.name&&isFinite(+x.lat)&&isFinite(+x.lng)&&(normName(x.name).includes(nq)||normName(x.kana).includes(nq))).slice(0,6).map(x=>({name:String(x.name),lat:+x.lat,lon:+x.lng,addr:String(x.address||""),hp:{id:String(x.id||""),url:String(x.url||""),open:String(x.open||""),genre:String(x.genre||""),budget:String(x.budget||"")}}))}
+  async function hpCall(body){if(hpOff||!S.sb||!S.me)return[];
+    try{const {data,error}=await S.sb.functions.invoke("hotpepper",{body});if(error)throw error;
+      return (data&&data.shops||[]).filter(x=>x&&x.name&&isFinite(+x.lat)&&isFinite(+x.lng)).map(x=>({name:String(x.name),kana:String(x.kana||""),lat:+x.lat,lon:+x.lng,addr:String(x.address||""),hp:{id:String(x.id||""),url:String(x.url||""),open:String(x.open||""),genre:String(x.genre||""),budget:String(x.budget||"")}}))}
     catch(e){hpOff=true;return[]}}
-  function renderSugg(keep){const q=$("#pName").value.trim();if(!keep)photonSearch(q);const list=shopCandidates(q);suggBox.textContent="";
+  // a shop name search also matches addresses ("ココスクエア"): keep shops whose name or reading has the words (or the place words, see termsMatch)
+  async function hpSearch(q){const ts=termsOf(q);return (await hpCall({q})).filter(h=>termsMatch(ts,h.name+" "+h.kana,h.addr)).slice(0,6)}
+  const hitRow=(h,extra)=>el("button",{type:"button",onclick:()=>h.hp?useHp(h):usePhoton(h)},el("span",{class:"pin-ic","aria-hidden":"true",text:"📍"}),el("span",{},el("b",{text:h.name}),el("small",{text:(extra||"")+(h.addr||"住所なし")+(h.hp&&h.hp.genre?"・"+h.hp.genre:"")})));
+  const credits=hits=>{if(hits.some(h=>h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 0;margin:0;font-size:11px"},el("a",{href:"http://webservice.recruit.co.jp/",target:"_blank",rel:"noopener",text:"Powered by ホットペッパーグルメ Webサービス"})));
+    if(hits.some(h=>!h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 6px;margin:0;font-size:11px"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"))};
+  // not in the list: zoom the map below and tap the spot
+  function toMiniMap(){suggBox.hidden=true;const w=$("#miniWrap");w.scrollIntoView({block:"center",behavior:"smooth"});w.classList.add("flash");setTimeout(()=>w.classList.remove("flash"),1600)}
+  function renderSugg(keep){const q=$("#pName").value.trim();if(!keep)photonSearch(q);suggBox.textContent="";
+    if(!q){renderNear();suggBox.hidden=!suggBox.children.length;return}
+    const list=shopCandidates(q);
     if(list.length){suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
       for(const{p,count}of list)suggBox.append(el("button",{type:"button",onclick:()=>useShop(p)},photoEl(p,"thumb"),el("span",{},el("b",{text:p.name}),el("small",{text:placeLabel(p)+(count>1?`・${count}人が投稿`:"")}))))}
     const known=new Set(list.map(x=>normName(x.p.name)));const hits=PH.q===q?PH.hits.filter(h=>!(known.has(normName(h.name))&&!h.addr)):[];
     if(hits.length||(PH.busy&&PH.q===q&&normName(q).length>=2)){suggBox.append(el("div",{class:"cap",text:PH.busy?"お店をさがしています…":"お店の候補（タップで場所を入れる）"}));
-      for(const h of hits)suggBox.append(el("button",{type:"button",onclick:()=>h.hp?useHp(h):usePhoton(h)},el("span",{class:"pin-ic","aria-hidden":"true",text:"📍"}),el("span",{},el("b",{text:h.name}),el("small",{text:(h.addr||"住所なし")+(h.hp&&h.hp.genre?"・"+h.hp.genre:"")}))));
-      if(hits.some(h=>h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 0;margin:0;font-size:11px"},el("a",{href:"http://webservice.recruit.co.jp/",target:"_blank",rel:"noopener",text:"Powered by ホットペッパーグルメ Webサービス"})));
-      if(hits.some(h=>!h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 6px;margin:0;font-size:11px"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"))}
+      for(const h of hits)suggBox.append(hitRow(h));credits(hits)}
+    if(normName(q).length>=2&&!(PH.busy&&PH.q===q))suggBox.append(el("button",{type:"button",class:"pinrow",onclick:toMiniMap},el("span",{class:"pin-ic","aria-hidden":"true",text:"🗺️"}),el("span",{},el("b",{text:"候補にない？地図でピンを立てる"}),el("small",{text:"下の地図を広げて、お店の場所をタップしてね"}))));
     suggBox.hidden=!suggBox.children.length}
+  // nearby shops from the current position: Hot Pepper (about 1 km) and OpenStreetMap places, nearest first
+  const NEAR={busy:false,hits:null,err:""};
+  const kmBetween=(a,b,c,d)=>{const R=6371,r=Math.PI/180,x=(d-b)*r*Math.cos((a+c)/2*r),y=(c-a)*r;return R*Math.hypot(x,y)};
+  const distLabel=km=>km<1?`約${Math.max(10,Math.round(km*100)*10)}m・`:`約${km.toFixed(1)}km・`;
+  function renderNear(){if(!navigator.geolocation||!S.sb||!S.me)return;
+    suggBox.append(el("button",{type:"button",class:"pinrow",onclick:findNear,disabled:NEAR.busy},el("span",{class:"pin-ic","aria-hidden":"true",text:"🧭"}),el("span",{},el("b",{text:NEAR.busy?"近くのお店をさがしています…":"近くのお店を出す"}),el("small",{text:NEAR.err||"いまいる場所のまわりのお店から選べるよ"}))));
+    if(NEAR.hits&&NEAR.hits.length){suggBox.append(el("div",{class:"cap",text:"近くのお店（タップで入れる）"}));for(const h of NEAR.hits)suggBox.append(hitRow(h,distLabel(h.km)));credits(NEAR.hits)}
+    else if(NEAR.hits)suggBox.append(el("div",{class:"cap",text:"近くにお店が見つからなかった。名前で探してね"}))}
+  function findNear(){if(NEAR.busy)return;NEAR.busy=true;NEAR.err="";renderSugg(true);suggBox.hidden=false;
+    navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;
+      const ph=fetch("https://photon.komoot.io/reverse?"+new URLSearchParams({lat:String(lat),lon:String(lon),limit:"40",radius:"0.6",lang:"default",osm_tag:"amenity"})).then(r=>r.ok?r.json():{}).then(phHits).catch(()=>[]);
+      const [hp,osm]=await Promise.all([hpCall({lat,lng:lon}),ph]);
+      const all=[...hp,...osm.filter(h=>!hp.some(x=>normName(x.name)===normName(h.name)))].map(h=>({...h,km:kmBetween(lat,lon,h.lat,h.lon)})).filter(h=>h.km<=1.5).sort((a,b)=>a.km-b.km).slice(0,10);
+      NEAR.busy=false;NEAR.hits=all;if(!$("#pName").value.trim()){renderSugg(true);suggBox.hidden=false}},
+      e=>{NEAR.busy=false;NEAR.err=e.code===1?"位置情報が許可されていないよ。設定で許可するか、名前で探してね":"いまの場所がわからなかった。もう一度ためしてね";renderSugg(true);suggBox.hidden=false},
+      {enableHighAccuracy:true,timeout:12000,maximumAge:60000})}
   // picking a Hot Pepper shop: everything we need comes with it, and the shop id is kept for the booking button
   function useHp(h){suggBox.hidden=true;$("#pName").value=h.name;PH.q="";
     useOsm({lat:h.lat,lon:h.lon,name:h.name,display_name:"",extratags:{}},h.name);if(h.addr)addrIn.value=h.addr.slice(0,120);
@@ -1115,7 +1147,10 @@ function openProfile(){
       box.append(el("p",{class:"hint",style:"padding:6px 12px;margin:0"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"));box.hidden=false}
     catch(e){toast("いまはさがせなかった。少し待ってためしてね")}
     finally{btn.disabled=false;btn.textContent="店名から場所と営業時間をさがす"}};
-  $("#pName").addEventListener("blur",()=>setTimeout(()=>{if(!suggBox.contains(document.activeElement))suggBox.hidden=true},150));
+  // the list stays open while it is being used (tapping a row re-renders it and drops the focus); a tap anywhere else closes it
+  let suggTap=0;suggBox.addEventListener("pointerdown",()=>{suggTap=Date.now()});
+  $("#pName").addEventListener("blur",()=>setTimeout(()=>{if(Date.now()-suggTap<1500||suggBox.contains(document.activeElement))return;suggBox.hidden=true},150));
+  document.addEventListener("pointerdown",e=>{if(!suggBox.hidden&&!suggBox.contains(e.target)&&e.target!==$("#pName"))suggBox.hidden=true});
   $("#pName").addEventListener("focus",()=>renderSugg());
   addrIn.addEventListener("input",()=>{const r=parseAddress(addrIn.value);addrHint.hidden=!addrIn.value.trim();addrHint.className="hint";
     if(!r){addrHint.textContent="市区町村が見つからなかった。都道府県から入れてみてね";return}
@@ -1190,7 +1225,7 @@ function openProfile(){
     const id=p.id;(async()=>{const srcs=p.pics?[p.photo,...await getPics(p)]:photosOf(p);const its=[];for(const u of srcs){if(!okImg(u))continue;try{its.push({img:await loadImg(u),z:1,cx:.5,cy:.5})}catch(e){}}
       if(S.form.editId===id&&!S.form.photos.length){S.form.photos=its;setPhotoView()}})()};
   window.newPost=()=>{if(S.form.editId)resetForm()};
-  function resetForm(){$("#postForm").reset();S.form={rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null};drawRate();$("#miniWrap").hidden=true;$("#cityWrap").hidden=true;gmHint.classList.remove("ok");gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";addrHint.hidden=true;suggBox.hidden=true;$("#osmList").hidden=true;setPhotoView();setMode(false);const g0=$("#g0");if(g0)g0.checked=true}
+  function resetForm(){$("#postForm").reset();S.form={rate:3,photos:[],ar:"1:1",sel:null,x:null,y:null,city:null};drawRate();showPref("");gmHint.classList.remove("ok");gmHint.textContent="店名を入れるとGoogleマップや食べログで検索できるよ";addrHint.hidden=true;suggBox.hidden=true;$("#osmList").hidden=true;setPhotoView();setMode(false);const g0=$("#g0");if(g0)g0.checked=true}
 })();
 // ---------- photo framing ----------
 const ARS={"1:1":1,"4:5":.8,"16:9":16/9,"orig":null};

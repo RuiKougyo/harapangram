@@ -22,11 +22,21 @@ Deno.serve(async (req) => {
     new Response(JSON.stringify(body), { status, headers: { ...h, "content-type": "application/json" } });
   if (req.method !== "POST") return json({ error: "method" }, 405);
   if (!KEY) return json({ error: "no_key" }, 503);
-  let q = "";
-  try { q = String((await req.json()).q ?? "").trim(); } catch { return json({ error: "bad_json" }, 400); }
-  if (q.length < 2 || q.length > 40) return json({ shops: [] });
+  // {q}: shop name ("ココス"), or name plus place words ("ココス 国領") searched as keywords
+  // {lat, lng}: shops within about 1 km of that point, nearest first
+  let body: Record<string, unknown> = {};
+  try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+  const params: Record<string, string> = { key: KEY, format: "json" };
+  const lat = Number(body.lat), lng = Number(body.lng);
+  if (body.lat != null && Number.isFinite(lat) && Number.isFinite(lng) && lat > 20 && lat < 46.5 && lng > 122 && lng < 154) {
+    Object.assign(params, { lat: lat.toFixed(5), lng: lng.toFixed(5), range: "3", count: "15" });
+  } else {
+    const q = String(body.q ?? "").trim().replace(/\s+/g, " ");
+    if (q.length < 2 || q.length > 40) return json({ shops: [] });
+    Object.assign(params, q.includes(" ") ? { keyword: q, count: "20" } : { name_any: q, count: "8" });
+  }
   const u = new URL(API);
-  u.search = new URLSearchParams({ key: KEY, name_any: q, format: "json", count: "8" }).toString();
+  u.search = new URLSearchParams(params).toString();
   let d: Record<string, any>;
   try {
     const r = await fetch(u);
