@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   try { q = String((await req.json()).q ?? "").trim(); } catch { return json({ error: "bad_json" }, 400); }
   if (q.length < 2 || q.length > 40) return json({ shops: [] });
   const u = new URL(API);
-  u.search = new URLSearchParams({ key: KEY, keyword: q, format: "json", count: "8" }).toString();
+  u.search = new URLSearchParams({ key: KEY, name_any: q, format: "json", count: "8" }).toString();
   let d: Record<string, any>;
   try {
     const r = await fetch(u);
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   } catch { return json({ error: "upstream" }, 502); }
   if (d?.results?.error) return json({ error: "upstream" }, 502);
   const shops = (d?.results?.shop ?? []).map((s: Record<string, any>) => ({
-    id: s.id, name: s.name, address: s.address, lat: s.lat, lng: s.lng,
+    id: s.id, name: s.name, kana: s.name_kana, address: s.address, lat: s.lat, lng: s.lng,
     open: s.open, genre: s.genre?.name, budget: s.budget?.average, url: s.urls?.pc,
   }));
   return json({ shops }, 200);

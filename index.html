@@ -1208,7 +1208,9 @@ function openProfile(){
   let hpOff=false;
   async function hpSearch(q){if(hpOff||!S.sb||!S.me)return[];
     try{const {data,error}=await S.sb.functions.invoke("hotpepper",{body:{q}});if(error)throw error;
-      return (data&&data.shops||[]).filter(x=>x&&x.name&&isFinite(+x.lat)&&isFinite(+x.lng)).slice(0,6).map(x=>({name:String(x.name),lat:+x.lat,lon:+x.lng,addr:String(x.address||""),hp:{id:String(x.id||""),url:String(x.url||""),open:String(x.open||""),genre:String(x.genre||""),budget:String(x.budget||"")}}))}
+      const nq=normName(q);
+      // keyword search also matches addresses ("ココスクエア"), so keep only shops whose name or reading has what was typed
+      return (data&&data.shops||[]).filter(x=>x&&x.name&&isFinite(+x.lat)&&isFinite(+x.lng)&&(normName(x.name).includes(nq)||normName(x.kana).includes(nq))).slice(0,6).map(x=>({name:String(x.name),lat:+x.lat,lon:+x.lng,addr:String(x.address||""),hp:{id:String(x.id||""),url:String(x.url||""),open:String(x.open||""),genre:String(x.genre||""),budget:String(x.budget||"")}}))}
     catch(e){hpOff=true;return[]}}
   function renderSugg(keep){const q=$("#pName").value.trim();if(!keep)photonSearch(q);const list=shopCandidates(q);suggBox.textContent="";
     if(list.length){suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
