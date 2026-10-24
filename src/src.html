@@ -594,7 +594,7 @@ function bookLink(p){const A=window.HP_AFF||{};if(!p||p.sample)return null;
   if(p.hp&&/^J\d{6,12}$/.test(p.hp)&&/^\d{5,12}$/.test(A.vc_sid||"")&&/^\d{5,12}$/.test(A.vc_pid||""))
     return{href:`https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=${A.vc_sid}&pid=${A.vc_pid}&vc_url=`+encodeURIComponent(`https://www.hotpepper.jp/str${p.hp}/`),text:"ホットペッパーで予約"};
   if(/^[0-9A-Z+]{10,80}$/.test(A.a8mat||"")&&(p.price==="¥3,000〜6,000"||p.price==="¥6,000〜"))
-    return{href:`https://px.a8.net/svt/ejp?a8mat=${A.a8mat}&a8ejpredirect=`+encodeURIComponent(A.ikyu_url||"https://restaurant.ikyu.com/"),text:"一休で予約できるお店をさがす"};
+    return{href:`https://px.a8.net/svt/ejp?a8mat=${A.a8mat}&a8ejpredirect=`+encodeURIComponent("https://restaurant.ikyu.com/search?term="+encodeURIComponent(p.name)),text:"一休でこのお店をさがす"};
   return null}
 function bookEl(p){const b=bookLink(p);return b?el("a",{class:"gm book",href:b.href,target:"_blank",rel:"sponsored noopener"},el("span",{class:"prtag",text:"PR"}),b.text):null}
 function tabelogSearchUrl(name,place){return"https://www.google.com/search?q="+encodeURIComponent((name+" "+(place||"")).trim()+" site:tabelog.com")}
