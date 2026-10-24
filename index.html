@@ -135,6 +135,7 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .zoomed .muni{stroke-width:.6px}
 .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .gm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+.post a.book{gap:6px}.prtag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid currentColor;color:var(--muted)}
 .gm-row a,.post a.gm{color:var(--noren);font-weight:700;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px}
 .sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .sugg button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 10px;font-weight:400}
@@ -683,7 +684,8 @@ function shopGroup(p){const k=shopKey(p);if(S.shopsFor!==S.postsVer){S.shopsFor=
 function openShop(p){const list=shopGroup(p).slice().sort((a,b)=>b.createdAt-a.createdAt);const m=$("#modal");m.textContent="";
   const avg=list.reduce((a,q)=>a+(q.rate||0),0)/list.length;
   const box=el("div",{class:"card pad sheet"},el("h2",{style:"font-size:18px",text:p.name}),el("p",{class:"sub",text:`${placeLabel(p)}・${new Set(list.map(q=>q.author)).size}人が投稿・満足度の平均 ${avg.toFixed(1)}`}),
-    (h=>h?el("p",{class:"sub",text:"営業時間："+h.hours}):null)(list.find(q=>q.hours)));
+    (h=>h?el("p",{class:"sub",text:"営業時間："+h.hours}):null)(list.find(q=>q.hours)),
+    (q=>q?el("p",{class:"post",style:"margin:0"},bookEl(q)):null)(list.find(q=>bookLink(q))));
   for(const q of list)box.append(el("button",{type:"button",class:"item",style:"background:none;border:0;border-top:1px solid var(--line);width:100%;text-align:left;color:inherit;font:inherit",onclick:()=>{m.hidden=true;openViewer(0,q.id)}},
     avatar(q.author),el("div",{class:"txt"},el("b",{text:(q.author===S.me&&!q.sample?"自分":nick(q.author))+`・満足度${q.rate||0}`}),el("small",{text:(q.comment||"ひとことなし")+"・"+ago(q.createdAt)}))));
   box.append(el("button",{type:"button",class:"btn ghost",style:"margin-top:12px",onclick:()=>{m.hidden=true},text:"閉じる"}));m.append(box);m.hidden=false}
@@ -731,6 +733,15 @@ function parseAddress(t){t=(t||"").normalize("NFKC").replace(/\s/g,"");if(!t)ret
     const score=-i*10+m.name.length;if(!best||score>best.score)best={m,score}}
   if(best)return{pref:best.m.pref,city:best.m.code};
   return pref?{pref,city:null}:null}
+// Affiliate booking links (config.js window.HP_AFF; empty = no button). Hot Pepper through ValueCommerce MyLink for shops picked from
+// Hot Pepper suggestions; Ikyu through an A8 deep link for the pricier posts. Always labelled PR and rel="sponsored".
+function bookLink(p){const A=window.HP_AFF||{};if(!p||p.sample)return null;
+  if(p.hp&&/^J\d{6,12}$/.test(p.hp)&&/^\d{5,12}$/.test(A.vc_sid||"")&&/^\d{5,12}$/.test(A.vc_pid||""))
+    return{href:`https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=${A.vc_sid}&pid=${A.vc_pid}&vc_url=`+encodeURIComponent(`https://www.hotpepper.jp/str${p.hp}/`),text:"ホットペッパーで予約"};
+  if(/^[0-9A-Z+]{10,80}$/.test(A.a8mat||"")&&(p.price==="¥3,000〜6,000"||p.price==="¥6,000〜"))
+    return{href:`https://px.a8.net/svt/ejp?a8mat=${A.a8mat}&a8ejpredirect=`+encodeURIComponent(A.ikyu_url||"https://restaurant.ikyu.com/"),text:"一休で予約できるお店をさがす"};
+  return null}
+function bookEl(p){const b=bookLink(p);return b?el("a",{class:"gm book",href:b.href,target:"_blank",rel:"sponsored noopener"},el("span",{class:"prtag",text:"PR"}),b.text):null}
 function tabelogSearchUrl(name,place){return"https://www.google.com/search?q="+encodeURIComponent((name+" "+(place||"")).trim()+" site:tabelog.com")}
 function gmapSearchUrl(name,place){return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((name+" "+(place||"")).trim())}
 function stat(v,l){return el("div",{class:"stat"},el("b",{text:String(v)}),el("small",{text:l}))}
@@ -783,6 +794,7 @@ function postCard(p){
       el("div",{class:"row-gap",style:"gap:16px"},mine?el("button",{class:"linkish",onclick:()=>{closeViewer();window.startEdit(p)},text:"編集"}):null,el("button",{class:"linkish",onclick:()=>{closeViewer();S.mapPref=p.pref;S.mapCity=p.city||null;go("map");zoomTo(p.pref,p.city);renderMap()},text:"地図で見る"}),
         el("a",{class:"gm",href:(p.gmap&&safeGmap(p.gmap))||gmapSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"Googleマップで開く"}),
         el("a",{class:"gm",href:tabelogSearchUrl(p.name,placeLabel(p)),target:"_blank",rel:"noopener",text:"食べログで探す"}),
+        bookEl(p),
         !mine&&!p.sample?el("button",{class:"linkish",style:"color:var(--muted)",onclick:()=>{closeViewer();openReport({target:p.author,post:p.id})},text:"通報"}):null)));
 }
 const IC={heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'};

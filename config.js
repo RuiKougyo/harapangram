@@ -5,3 +5,8 @@ window.HP_CONFIG = {
   url: "https://tgabyfbrxnwptmesgodb.supabase.co",
   anonKey: "sb_publishable_bLFSQcGFjJUiSAES1kVkAA_K2HrALBa"
 };
+
+// アフィリエイト（予約ボタン）。空のままならボタンは出ません。ここに入れるのは公開用のコードだけです（ログイン情報は入れない）。
+// vc_sid / vc_pid: バリューコマース MyLink の sid と pid の数字（ホットペッパーグルメ）
+// a8mat: A8.net の一休レストランのリンクコードにある a8mat= の値
+window.HP_AFF = { vc_sid: "", vc_pid: "", a8mat: "" };
