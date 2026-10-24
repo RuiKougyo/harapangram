@@ -50,6 +50,8 @@ const out={};const fails=[];const ok=(k,v)=>{out[k]=v;if(!v)fails.push(k)};const
     // C (one-way) sees nothing, even asking the database and storage directly
     ok("cNoRows",await C.p.evaluate(async a=>(await S.sb.from("posts").select("id").eq("author",a)).data.length===0,A.me));
     ok("bSeesALists",await B.p.evaluate(async a=>{const r=await S.sb.rpc("friend_lists",{p_uid:a});return !r.error&&r.data.length>0},A.me));
+    {const hp=await A.p.evaluate(async()=>{const r=await S.sb.functions.invoke("hotpepper",{body:{q:"居酒屋 梅田"}});let err=null;if(r.error){err=r.error.message;try{err+=" "+await r.error.context.text()}catch(e){}}return{n:r.data&&r.data.shops?r.data.shops.length:-1,first:r.data&&r.data.shops&&r.data.shops[0]?r.data.shops[0].name+" "+r.data.shops[0].id:null,err}});
+     out.hotpepper=hp;ok("hotpepperShops",hp.n>0)}
     ok("cNoLists",await C.p.evaluate(async a=>{const r=await S.sb.rpc("friend_lists",{p_uid:a});return !r.error&&r.data.length===0},A.me));
     ok("cNoPhoto",await C.p.evaluate(async path=>{const r=await S.sb.storage.from("photos").createSignedUrl(path,60);return !r.data||!r.data.signedUrl},post&&post.data.photo.slice(3)));
     ok("cNoWrite",await C.p.evaluate(async a=>!!(await S.sb.from("posts").upsert({author:a,id:"hack",data:{name:"x"}},{onConflict:"author,id"})).error,A.me));
