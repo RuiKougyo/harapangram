@@ -95,5 +95,5 @@
 - `tests/live-e2e.js` / `.github/workflows/live-test.yml` … 本番テスト
 - `.github/workflows/keepalive.yml` … 休止防止
 - 地図データ：jpn-atlas（BSD-3）、市区町村名：jp-local-gov（MIT）
-- 店名の入力候補：Photon（komoot、OpenStreetMap データ。入力が止まって0.35秒後に1回）
+- 店名の入力候補：ホットペッパーグルメ Webサービス（Supabase の Edge Function `hotpepper` 経由。キーは Secrets の `HOTPEPPER_KEY`。未設定なら自動で使わない）と Photon（komoot、OpenStreetMap データ。入力が止まって0.35秒後に1回）
 - お店の場所・営業時間の検索：OpenStreetMap / Nominatim（候補を選んだときかボタンを押したときだけ、1秒に1回まで）

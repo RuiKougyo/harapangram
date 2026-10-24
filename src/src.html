@@ -1052,19 +1052,33 @@ function openProfile(){
     if(PH.cache.has(q)){PH.hits=PH.cache.get(q);PH.busy=false;return}
     PH.busy=true;PH.hits=[];
     PH.timer=setTimeout(async()=>{const ctl=PH.ctl=new AbortController();
+      const hp=await hpSearch(q);if(PH.q!==q||ctl.signal.aborted)return;
       const u=new URLSearchParams({q,limit:"20",lang:"default",bbox:"122,24,154,46"});
       try{const r=await fetch("https://photon.komoot.io/api/?"+u,{signal:ctl.signal});if(!r.ok)throw new Error(r.status);const j=await r.json();
         const hits=(j.features||[]).filter(f=>f&&f.geometry&&f.properties&&f.properties.name&&f.properties.countrycode==="JP"&&FOOD_TAGS.includes(f.properties.osm_key+":"+f.properties.osm_value)).slice(0,5).map(f=>({name:f.properties.name,lon:+f.geometry.coordinates[0],lat:+f.geometry.coordinates[1],addr:phAddr(f.properties),osm:(f.properties.osm_type||"")+(f.properties.osm_id||"")}));
-        PH.cache.set(q,hits);if(PH.q===q){PH.hits=hits;PH.busy=false;renderSugg(true)}}
-      catch(e){if(e.name!=="AbortError"&&PH.q===q){PH.busy=false;PH.hits=[];renderSugg(true)}}},350)}
+        const all=[...hp,...hits.filter(h=>!hp.some(x=>normName(x.name)===normName(h.name)))].slice(0,8);
+        PH.cache.set(q,all);if(PH.q===q){PH.hits=all;PH.busy=false;renderSugg(true)}}
+      catch(e){if(e.name!=="AbortError"&&PH.q===q){PH.busy=false;PH.hits=hp;renderSugg(true)}}},350)}
+  // Hot Pepper Gourmet search through the "hotpepper" Supabase function; switched off for this visit if it is not deployed yet
+  let hpOff=false;
+  async function hpSearch(q){if(hpOff||!S.sb||!S.me)return[];
+    try{const {data,error}=await S.sb.functions.invoke("hotpepper",{body:{q}});if(error)throw error;
+      return (data&&data.shops||[]).filter(x=>x&&x.name&&isFinite(+x.lat)&&isFinite(+x.lng)).slice(0,6).map(x=>({name:String(x.name),lat:+x.lat,lon:+x.lng,addr:String(x.address||""),hp:{id:String(x.id||""),url:String(x.url||""),open:String(x.open||""),genre:String(x.genre||""),budget:String(x.budget||"")}}))}
+    catch(e){hpOff=true;return[]}}
   function renderSugg(keep){const q=$("#pName").value.trim();if(!keep)photonSearch(q);const list=shopCandidates(q);suggBox.textContent="";
     if(list.length){suggBox.append(el("div",{class:"cap",text:"友だちが行ったお店"}));
       for(const{p,count}of list)suggBox.append(el("button",{type:"button",onclick:()=>useShop(p)},photoEl(p,"thumb"),el("span",{},el("b",{text:p.name}),el("small",{text:placeLabel(p)+(count>1?`・${count}人が投稿`:"")}))))}
     const known=new Set(list.map(x=>normName(x.p.name)));const hits=PH.q===q?PH.hits.filter(h=>!(known.has(normName(h.name))&&!h.addr)):[];
     if(hits.length||(PH.busy&&PH.q===q&&normName(q).length>=2)){suggBox.append(el("div",{class:"cap",text:PH.busy?"お店をさがしています…":"お店の候補（タップで場所を入れる）"}));
-      for(const h of hits)suggBox.append(el("button",{type:"button",onclick:()=>usePhoton(h)},el("span",{class:"pin-ic","aria-hidden":"true",text:"📍"}),el("span",{},el("b",{text:h.name}),el("small",{text:h.addr||"住所なし"}))));
-      if(hits.length)suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 6px;margin:0;font-size:11px"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"))}
+      for(const h of hits)suggBox.append(el("button",{type:"button",onclick:()=>h.hp?useHp(h):usePhoton(h)},el("span",{class:"pin-ic","aria-hidden":"true",text:"📍"}),el("span",{},el("b",{text:h.name}),el("small",{text:(h.addr||"住所なし")+(h.hp&&h.hp.genre?"・"+h.hp.genre:"")}))));
+      if(hits.some(h=>h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 0;margin:0;font-size:11px"},el("a",{href:"http://webservice.recruit.co.jp/",target:"_blank",rel:"noopener",text:"Powered by ホットペッパーグルメ Webサービス"})));
+      if(hits.some(h=>!h.hp))suggBox.append(el("p",{class:"hint",style:"padding:4px 10px 6px;margin:0;font-size:11px"},"地図データ © ",el("a",{href:"https://www.openstreetmap.org/copyright",target:"_blank",rel:"noopener",text:"OpenStreetMap"})," contributors"))}
     suggBox.hidden=!suggBox.children.length}
+  // picking a Hot Pepper shop: everything we need comes with it, and the shop id is kept for the booking button
+  function useHp(h){suggBox.hidden=true;$("#pName").value=h.name;PH.q="";
+    useOsm({lat:h.lat,lon:h.lon,name:h.name,display_name:"",extratags:{}},h.name);if(h.addr)addrIn.value=h.addr.slice(0,120);
+    if(h.hp.open&&!$("#pHours").value.trim())$("#pHours").value=h.hp.open.replace(/\s+/g," ").slice(0,80);
+    S.form.hp=h.hp.id&&/^J\d{6,12}$/.test(h.hp.id)?{id:h.hp.id,name:h.name}:null}
   // picking a place: one Nominatim lookup by its OSM id for the full address and opening hours, else the Photon data alone
   async function usePhoton(h){suggBox.hidden=true;$("#pName").value=h.name;PH.q="";
     const fallback={lat:h.lat,lon:h.lon,name:h.name,display_name:[h.name,...h.addr?[h.addr]:[]].join(", ")};
@@ -1075,7 +1089,7 @@ function openProfile(){
   function useShop(p){$("#pName").value=p.name;sel.value=p.pref;S.form.city=p.city||null;S.form.x=p.x??null;S.form.y=p.y??null;showPref(p.pref,true);
     if(p.addr){addrIn.value=p.addr}if(p.gmap&&safeGmap(p.gmap)){gmIn.value=p.gmap}suggBox.hidden=true;updateGm();
     addrHint.hidden=false;addrHint.className="hint ok";addrHint.textContent="場所を入れたよ："+placeLabel(p)}
-  $("#pName").addEventListener("input",e=>{updateGm();if(e.isComposing){renderSugg(true);return}renderSugg()});
+  $("#pName").addEventListener("input",e=>{updateGm();if(S.form.hp&&$("#pName").value.trim()!==S.form.hp.name)S.form.hp=null;if(e.isComposing){renderSugg(true);return}renderSugg()});
   $("#pName").addEventListener("compositionend",()=>renderSugg());
   window.prefillPost=p=>{resetForm();go("post");useShop(p);$("#pName").scrollIntoView({block:"center"})};
   // shop lookup in OpenStreetMap (Nominatim): one request per button press, at most 1 per second, as its usage policy asks
@@ -1141,7 +1155,7 @@ function openProfile(){
     if(!S.db||!S.me){err.textContent="ログインすると投稿できるよ";err.hidden=false;return}
     const editing=S.form.editId;const pid=editing||Date.now().toString(36)+Math.random().toString(36).slice(2,7);
     const gm=safeGmap($("#pGmap").value||"");if($("#pGmap").value.trim()&&!gm){err.textContent="GoogleマップのURLがおかしいみたい。消すか貼りなおしてね";err.hidden=false;return}
-    const data={name,pref,city:S.form.city||null,addr:$("#pAddr").value.trim()||null,gmap:gm,genre:(document.querySelector('input[name=genre]:checked')||{}).value||"その他",rate:S.form.rate,price:$("#pPrice").value,hours:$("#pHours").value.trim()||null,comment:$("#pComment").value.trim(),photo:null,more:null,x:S.form.x,y:S.form.y,createdAt:editing?S.form.createdAt:Date.now()};if(editing)data.updatedAt=Date.now();
+    const data={name,pref,city:S.form.city||null,addr:$("#pAddr").value.trim()||null,gmap:gm,genre:(document.querySelector('input[name=genre]:checked')||{}).value||"その他",rate:S.form.rate,price:$("#pPrice").value,hours:$("#pHours").value.trim()||null,hp:S.form.hp?S.form.hp.id:null,comment:$("#pComment").value.trim(),photo:null,more:null,x:S.form.x,y:S.form.y,createdAt:editing?S.form.createdAt:Date.now()};if(editing)data.updatedAt=Date.now();
     const btn=$("#pSubmit");btn.disabled=true;btn.textContent=editing?"更新中…":"投稿中…";
     // bake each crop into a JPEG: the cover rides in the post doc, photos 2-4 get their own docs (each under the 256KB limit)
     const items=S.form.photos;const r=formRatio();let cover=null,extras=[];
@@ -1166,7 +1180,7 @@ function openProfile(){
     const z=$("#dropZone");z.hidden=ph.length>=3;z.textContent="";z.append(el("span",{text:ph.length?`写真を追加（あと${3-ph.length}枚）`:"タップして写真をえらぶ（3枚まで）"}))}
   function setMode(edit){$("#postTitle").textContent=edit?"投稿を編集":"お店を投稿";$("#pSubmit").textContent=edit?"更新する":"投稿する";$("#pCancel").hidden=!edit}
   window.startEdit=p=>{resetForm();const arK=Object.keys(ARS).find(k=>ARS[k]&&Math.abs(ARS[k]-(+p.ar||0))<.01)||(p.ar?"orig":"1:1");
-    S.form={rate:p.rate||3,photos:[],ar:arK,sel:null,oldPics:p.pics|0,x:p.x??null,y:p.y??null,city:p.city||null,editId:p.id,createdAt:p.createdAt||Date.now()};
+    S.form={rate:p.rate||3,photos:[],ar:arK,sel:null,oldPics:p.pics|0,x:p.x??null,y:p.y??null,city:p.city||null,hp:p.hp&&/^J\d{6,12}$/.test(p.hp)?{id:p.hp,name:p.name}:null,editId:p.id,createdAt:p.createdAt||Date.now()};
     $("#pName").value=p.name||"";$("#pAddr").value=p.addr||"";$("#pGmap").value=p.gmap||"";$("#pPrice").value=p.price||"";$("#pHours").value=p.hours||"";$("#pComment").value=p.comment||"";
     const g=document.querySelector(`input[name=genre][value="${CSS.escape(p.genre||"その他")}"]`);if(g)g.checked=true;
     sel.value=p.pref||"";if(p.pref)showPref(p.pref,true);drawRate();setPhotoView();updateGm();setMode(true);go("post");
