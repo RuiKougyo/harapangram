@@ -9,4 +9,4 @@ window.HP_CONFIG = {
 // アフィリエイト（予約ボタン）。空のままならボタンは出ません。ここに入れるのは公開用のコードだけです（ログイン情報は入れない）。
 // vc_sid / vc_pid: バリューコマース MyLink の sid と pid の数字（ホットペッパーグルメ）
 // a8mat: A8.net の一休レストランのリンクコードにある a8mat= の値
-window.HP_AFF = { vc_sid: "", vc_pid: "", a8mat: "" };
+window.HP_AFF = { vc_sid: "", vc_pid: "", a8mat: "4BENDO+1SAU42+1OK+NX736" };
