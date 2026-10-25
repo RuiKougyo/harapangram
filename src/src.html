@@ -111,7 +111,7 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .zoomed .muni{stroke-width:.6px}
 .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .gm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
-.post a.book{gap:6px}.prtag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid currentColor;color:var(--muted)}
+.post a.book{gap:6px}.chip.near{background:var(--stamp);color:#fff}.prtag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid currentColor;color:var(--muted)}
 .gm-row a,.post a.gm{color:var(--noren);font-weight:700;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px}
 .sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .sugg button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 10px;font-weight:400}
@@ -632,6 +632,8 @@ function gallery(p){const legacy=photosOf(p);const n=p.pics?1+Math.min(2,p.pics|
   sc.addEventListener("scroll",sync,{passive:true});prev.hidden=true;
   return el("div",{class:"gal"},sc,prev,next,cnt)}
 function photoEl(p,cls="photo"){if(p.photo){if(cls==="photo"){const a=photoAttrs(p);return el("img",{class:a.class||"photo",style:a.style||"",src:p.photo,alt:p.name+"の写真",loading:"lazy"})}return el("img",{class:cls,src:p.photo,alt:p.name+"の写真",loading:"lazy"})}const g=GMAP[p.genre]||GENRES[7];return el("div",{class:"ph"+(cls==="thumb"?" thumb":""),style:`background:${g[2]}`,"aria-hidden":"true",text:g[1]})}
+// distance from the reader's position while the feed is sorted by 近い順 (map units: 1 = 1/32 degree of latitude; city-level posts are rough)
+function nearKm(p){if(S.sort!=="near"||!S.here)return null;const q=pinPos(p);return q?Math.hypot(q.x-S.here.x,q.y-S.here.y)*111.2/MAP.K:null}
 function postCard(p){
   const mine=p.author===S.me&&!p.sample;
   return el("article",{class:"card post"},
@@ -639,7 +641,7 @@ function postCard(p){
     gallery(p),
     el("div",{class:"body"},
       el("h3",{class:"shop",text:p.name}),
-      el("div",{class:"meta"},el("span",{class:"chip pref",text:placeLabel(p)}),el("span",{class:"chip",text:p.genre}),p.price?el("span",{text:p.price}):null),
+      el("div",{class:"meta"},el("span",{class:"chip pref",text:placeLabel(p)}),el("span",{class:"chip",text:p.genre}),p.price?el("span",{text:p.price}):null,(k=>k==null?null:el("span",{class:"chip near",text:k<.5?"すぐ近く":k<10?`約${k.toFixed(1)}km`:`約${Math.round(k)}km`}))(nearKm(p))),
       p.addr?el("p",{class:"addr",text:p.addr}):null,
       p.hours?el("p",{class:"addr",text:"営業時間："+p.hours}):null,
       hara(p.rate||0),
