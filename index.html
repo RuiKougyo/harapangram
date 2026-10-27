@@ -135,7 +135,7 @@ img.av{border:1px solid var(--line);background:var(--surface)}
 .zoomed .muni{stroke-width:.6px}
 .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .gm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
-.post a.book{gap:6px}.chip.near{background:var(--stamp);color:#fff}.prtag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid currentColor;color:var(--muted)}
+.post a.book{gap:6px}.chip.near{background:var(--stamp);color:#fff}.prnote{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;white-space:nowrap}.prtag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid currentColor;color:var(--muted)}
 .gm-row a,.post a.gm{color:var(--noren);font-weight:700;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px}
 .sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .sugg button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 10px;font-weight:400}
@@ -741,7 +741,7 @@ function bookLink(p){const A=window.HP_AFF||{};if(!p||p.sample)return null;
   if(/^[0-9A-Z+]{10,80}$/.test(A.a8mat||"")&&(p.price==="¥3,000〜6,000"||p.price==="¥6,000〜"))
     return{href:`https://px.a8.net/svt/ejp?a8mat=${A.a8mat}&a8ejpredirect=`+encodeURIComponent("https://restaurant.ikyu.com/search?term="+encodeURIComponent(p.name)),text:"一休でこのお店をさがす"};
   return null}
-function bookEl(p){const b=bookLink(p);return b?el("a",{class:"gm book",href:b.href,target:"_blank",rel:"sponsored noopener"},el("span",{class:"prtag",text:"PR"}),b.text):null}
+function bookEl(p){const b=bookLink(p);return b?el("a",{class:"gm book",href:b.href,target:"_blank",rel:"sponsored noopener"},el("span",{class:"prtag",text:"PR"}),b.text,el("span",{class:"prnote",text:"#アフィリエイト広告"})):null}
 function tabelogSearchUrl(name,place){return"https://www.google.com/search?q="+encodeURIComponent((name+" "+(place||"")).trim()+" site:tabelog.com")}
 function gmapSearchUrl(name,place){return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((name+" "+(place||"")).trim())}
 function stat(v,l){return el("div",{class:"stat"},el("b",{text:String(v)}),el("small",{text:l}))}
